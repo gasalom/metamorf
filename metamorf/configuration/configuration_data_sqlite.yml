@@ -1,0 +1,3 @@
+data:
+  connection_type: 'SQLite'
+  sqlite_path: 'data_example.db'

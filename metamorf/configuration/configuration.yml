@@ -1,0 +1,13 @@
+name: 'ProjectName'
+owner: 'default'
+modules:
+  - name: 'elt'
+    status: 'ACTIVE'
+  - name: 'datavault'
+    status: 'INACTIVE'
+    char_separator_naming: '_'
+output:
+  type: 'sql'
+api:
+  port: 5555
+  host: localhost

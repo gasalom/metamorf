@@ -1,0 +1,9 @@
+data:
+  connection_type: 'Snowflake'
+  snowflake_user: ''
+  snowflake_password: ''
+  snowflake_schema: 'DATA'
+  snowflake_warehouse: 'COMPUTE_WH'
+  snowflake_account: ''
+  snowflake_database: 'METAMORF'
+  snowflake_role: ''

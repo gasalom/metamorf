@@ -1,0 +1,111 @@
+name: "Metamorf"
+description: "Metadata Suite to control all your Datawarehouse metadata-driven"
+version: "0.3.9b"
+author: "Guillermo Aumatell Salom"
+contact: "guillermoaumatell@gmail.com"
+
+commands:
+  - name: 'help'
+    description: 'Shows all the commands available.'
+  - name: 'manifest'
+    description: 'Generates a Manifest Json File.'
+  - name: 'api'
+    description: 'Deploys an API that serve all the metadata information.'
+  - name: 'validate'
+    description: 'Validates the configuration file.'
+  - name: 'init'
+    description: 'Metamorf Initialization on the current directory.'
+    args:
+      - name: 'database'
+        options: ['-d', '--database']
+        values: ['SQLite', 'Snowflake']
+      - name: 'metadata'
+        options: ['-m', '--metadata']
+        values: ['SQLite', 'Snowflake']
+  - name: 'deploy'
+    description: 'Deploys on the metadata database all the requirements.'
+  - name: 'deploy-example'
+    description: 'Deploys on the metadata database all the requirement with metadata information and example data on the data database an example.'
+  - name: 'download'
+    description: 'Downloads the Metadata Entry of the Owner selected on CSV files, on the directory [entry].'
+    args:
+      - name: 'select'
+        options: ['-s', '--select']
+        values: ['entry_order', 'entry_aggregators','entry_filters', 'entry_path', 'entry_dataset_mappings','entry_dataset_relationships','entry_entity', '*', 'all']
+      - name: 'owner'
+        options: ['-o', '--owner']
+        accept_all_values: 'Y'
+        values: ['default']
+  - name: 'upload'
+    description: 'Uploads the Metadata Entry on the Metadata Database.'
+    args:
+      - name: 'select'
+        options: [ '-s', '--select' ]
+        values: [ 'entry_order', 'entry_aggregators','entry_filters', 'entry_path', 'entry_dataset_mappings','entry_dataset_relationships','entry_entity', '*', 'all' ]
+  - name: 'commit'
+    description: 'Commits the actual metadata from your owner.'
+  - name: 'recover'
+    description: 'Recover the last commit metadata of your owner.'
+    args:
+      - name: 'select'
+        options: [ '-s', '--select' ]
+        values: ['entry_order', 'entry_aggregators','entry_filters', 'entry_path', 'entry_dataset_mappings','entry_dataset_relationships','entry_entity', '*', 'all']
+  - name: 'process'
+    description: 'Process all the metadata entry to promote the metadata.'
+  - name: 'run'
+    description: 'Execute the processes of the metadata.'
+    args:
+      - name: 'select'
+        accept_all_values: 'Y'
+        options: [ '-s', '--select' ]
+        values: [ '*', 'all' ]
+  - name: 'output'
+    description: 'Generates the files of the processes on the output directory.'
+    args:
+      - name: 'select'
+        options: ['-s','--select']
+        accept_all_values: 'Y'
+        values: [ '*', 'all']
+  - name: 'delete'
+    description: 'Deletes all the metadata from the owner.'
+  - name: 'backup'
+    description: 'Downloads all the Metadata onto CSV Files to backup all the system'
+  - name: 'restore'
+    description: 'Restores all the metadata from a backup.'
+
+
+options:
+  log_print: 'Y'
+  print_debug: 'Y'
+  max_commit_batch: 100
+
+modules:
+  - name: "elt"
+    description: "Module to load all the temporary tables."
+    version: 0.5.1
+    functions:
+      - name: "status"
+        values: ['ACTIVE','INACTIVE']
+  - name: "datavault"
+    description: "Module to load all the DataVault entities: Hubs, Links, Sats, Pits, Bridges..."
+    version: 0.0.0
+    functions:
+      - name: "status"
+        values: ['ACTIVE','INACTIVE']
+      - name: "char_separator_naming"
+        values: ['_', '__', '$', '&', '/']
+
+database:
+  - name: 'SQLite'
+    mandatory_fields: ['sqlite_path']
+  - name: 'Snowflake'
+    mandatory_fields: ['snowflake_user', 'snowflake_password', 'snowflake_schema', 'snowflake_warehouse', 'snowflake_account', 'snowflake_database', 'snowflake_role']
+  - name: 'Firebird'
+    mandatory_fields: ['firebird_host', 'firebird_database', 'firebird_user', 'firebird_password']
+
+output:
+  type: ['dbt', 'sql']
+
+api:
+  port: 5555
+  host: localhost
