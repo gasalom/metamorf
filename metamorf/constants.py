@@ -1,7 +1,7 @@
 import os
 
 # METAMORF PROPERTIES
-VERSION = "0.4.3"
+VERSION = "0.4.3.1"
 
 # Constants for QUERY TYPES
 QUERY_TYPE_INSERT = 0
