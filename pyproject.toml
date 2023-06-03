@@ -1,10 +1,10 @@
 [project]
 name = "Metamorf"
-version = "0.3.9.1"
+version = "0.4"
 authors = [
   { name="Guillermo Aumatell", email="gaumatellsalom@gmail.com" },
 ]
-description = "Metadata Suite to build and control your Datawarehouse"
+description = "Metadata Suite to build and manage your Datawarehouse"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
@@ -15,11 +15,14 @@ classifiers = [
 dependencies = [
     "snowflake-connector-python",
     "PyYAML",
-    "Flask"
+    "Flask",
+    "psycopg2"
 ]
 
 [tool.setuptools]
-packages = ["metamorf", "metamorf.engines", "metamorf.tools", "metamorf.configuration", "metamorf.initialization", "metamorf.entry"]
+packages = ["metamorf", "metamorf.engines", "metamorf.tools", "metamorf.entry",
+    "metamorf.configuration", "metamorf.configuration.mysql" , "metamorf.configuration.snowflake", "metamorf.configuration.sqlite",
+    "metamorf.initialization.sqlite",  "metamorf.initialization.snowflake", "metamorf.initialization.mysql"]
 
 [tool.setuptools.package-data]
 "metamorf.configuration" = ["*.yml"]
@@ -35,5 +38,5 @@ packages = ["metamorf", "metamorf.engines", "metamorf.tools", "metamorf.configur
 metamorf = "metamorf.main:main"
 
 [build-system]
-requires = ["setuptools>=61.0", "snowflake-connector-python", "fdb", "PyYAML", "Flask"]
+requires = ["setuptools>=61.0", "snowflake-connector-python", "fdb", "PyYAML", "Flask", "psycopg2"]
 build-backend = "setuptools.build_meta"

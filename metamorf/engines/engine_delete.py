@@ -96,4 +96,36 @@ class EngineDelete(Engine):
         query.set_where_filters(where_filter)
         self.connection.execute(str(query))
 
+        # ENTRY_FILES
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_ENTRY_FILES)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
+        # ENTRY_DV_MAPPINGS
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_ENTRY_DV_MAPPINGS)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
+        # ENTRY_DV_ENTITY
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_ENTRY_DV_ENTITY)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
+        # ENTRY_DV_PROPERTIES
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_ENTRY_DV_PROPERTIES)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
         self.log.log(self.engine_name, "Finished to delete actual metadata", LOG_LEVEL_INFO)

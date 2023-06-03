@@ -39,12 +39,16 @@ class EngineOutput(Engine):
                 node.query.set_type(QUERY_TYPE_SELECT)
                 content = str(node.query)
                 content = self.dbt_create_config_for_models(node) + "\n\n" + content
-                for table in node.predecessors:
+                all_substitutions = node.predecessors
+                all_substitutions.append(node.name)
+                for table in all_substitutions:
                     dataset = self.metadata.get_dataset_from_dataset_name(table)
                     fqdn = self.metadata.get_dataset_fqdn_from_dataset_name(table)
                     if dataset.id_entity_type == self.metadata.get_entity_type_from_entity_type_name(ENTITY_SRC).id_entity_type:
                         path = self.metadata.get_path_from_id_path(dataset.id_path)
                         content = re.sub("\s+"+fqdn+"\s+|\r", " {{source('"+self.get_source_dbt_name_from_path(path)+"','"+table+"')}} ", content )
+                    elif table == node.name:
+                        content = re.sub("\s+" + fqdn + "\s+|\r", " {{this}} ", content)
                     else:
                         content = re.sub("\s+" + fqdn + "\s|\r+", " {{ref('" + table + "')}} ", content)
 

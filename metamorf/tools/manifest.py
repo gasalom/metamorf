@@ -79,9 +79,9 @@ def generate_manifest(metadata, configuration, all_nodes):
                 d_col['column_type'] = col.column_type
                 d_col['ordinal_position'] = col.ordinal_position
                 d_col['is_nullable'] = col.is_nullable
-                d_col['length'] = col.length
-                d_col['precision'] = col.precision
-                d_col['scale'] = col.scale
+                d_col['column_length'] = col.column_length
+                d_col['column_precision'] = col.column_precision
+                d_col['column_scale'] = col.column_scale
                 d_columns.append(d_col)
         d_info['columns'] = d_columns
 

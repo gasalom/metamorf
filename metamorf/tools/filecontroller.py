@@ -139,16 +139,20 @@ class FileControllerCSV(FileController):
     def __init__(self):
         self.extension = FILE_TYPE_CSV
         self.file = None
+        self.delimiter = ','
+
+    def set_delimiter(self, delimiter_character):
+        self.delimiter = delimiter_character
 
     def read_file(self):
-        if len(self.file_name) == 0 or self.file_name is None: raise ValueError(
-            "FileController_SQL: Trying to read a file with None null")
-        final_path = self.path + '\\' + self.file_name
+        if len(self.file_name) == 0 or self.file_name is None: raise ValueError("FileController_SQL: Trying to read a file with None null")
+        if self.path is None or self.path == '': final_path = self.file_name
+        else: final_path = self.path + '\\' + self.file_name
         if final_path[-4:] != "." + self.extension:
             final_path += "." + self.extension
         try:
             with open(final_path, encoding='utf-8') as file:
-                reader = csv.reader(file, delimiter=',', quotechar = '"')
+                reader = csv.reader(file, delimiter=self.delimiter, quotechar = '"')
                 result = []
                 for row in reader:
                     result.append(row)

@@ -11,10 +11,16 @@ class EngineUpload(Engine):
         self.engine_name = "Engine Upload"
         self.engine_command = "upload"
 
-        self.entry_files_to_load = [FILE_ENTRY_AGGREGATORS, FILE_ENTRY_DATASET_MAPPINGS, FILE_ENTRY_DATASET_RELATIONSHIPS, FILE_ENTRY_ENTITY, FILE_ENTRY_FILTERS, FILE_ENTRY_ORDER, FILE_ENTRY_PATH,FILE_ENTRY_HAVING, TABLE_ENTRY_AGGREGATORS]
+        self.entry_files_to_load = [FILE_ENTRY_AGGREGATORS, FILE_ENTRY_DATASET_MAPPINGS, FILE_ENTRY_DATASET_RELATIONSHIPS,
+                                    FILE_ENTRY_ENTITY, FILE_ENTRY_FILTERS, FILE_ENTRY_ORDER, FILE_ENTRY_PATH,
+                                    FILE_ENTRY_HAVING, FILE_ENTRY_DV_ENTITY, FILE_ENTRY_DV_PROPERTIES,
+                                    FILE_ENTRY_DV_MAPPINGS, FILE_ENTRY_FILES]
         if 'select' in self.arguments:
             if self.arguments['select'] == "all" or self.arguments['select'] == "*":
-                self.entry_files_to_load = [FILE_ENTRY_AGGREGATORS, FILE_ENTRY_DATASET_MAPPINGS, FILE_ENTRY_DATASET_RELATIONSHIPS, FILE_ENTRY_ENTITY, FILE_ENTRY_FILTERS, FILE_ENTRY_ORDER, FILE_ENTRY_PATH,FILE_ENTRY_HAVING, FILE_ENTRY_AGGREGATORS]
+                self.entry_files_to_load = [FILE_ENTRY_AGGREGATORS, FILE_ENTRY_DATASET_MAPPINGS, FILE_ENTRY_DATASET_RELATIONSHIPS,
+                                            FILE_ENTRY_ENTITY, FILE_ENTRY_FILTERS, FILE_ENTRY_ORDER, FILE_ENTRY_PATH,
+                                            FILE_ENTRY_HAVING, FILE_ENTRY_DV_ENTITY, FILE_ENTRY_DV_PROPERTIES,
+                                            FILE_ENTRY_DV_MAPPINGS, FILE_ENTRY_FILES]
             if self.arguments['select'].lower() == FILE_ENTRY_DATASET_MAPPINGS.lower():
                 self.entry_files_to_load = [FILE_ENTRY_DATASET_MAPPINGS]
             if self.arguments['select'].lower() == FILE_ENTRY_DATASET_RELATIONSHIPS.lower():
@@ -29,8 +35,15 @@ class EngineUpload(Engine):
                 self.entry_files_to_load = [FILE_ENTRY_PATH]
             if self.arguments['select'].lower() == FILE_ENTRY_HAVING.lower():
                 self.entry_files_to_load = [FILE_ENTRY_HAVING]
-            if self.arguments['select'].lower() == TABLE_ENTRY_AGGREGATORS.lower():
-                self.tables_to_load = [TABLE_ENTRY_AGGREGATORS]
+            if self.arguments['select'].lower() == FILE_ENTRY_DV_ENTITY.lower():
+                self.tables_to_load = [FILE_ENTRY_DV_ENTITY]
+            if self.arguments['select'].lower() == FILE_ENTRY_DV_PROPERTIES.lower():
+                self.tables_to_load = [FILE_ENTRY_DV_PROPERTIES]
+            if self.arguments['select'].lower() == FILE_ENTRY_DV_MAPPINGS.lower():
+                self.tables_to_load = [FILE_ENTRY_DV_MAPPINGS]
+            if self.arguments['select'].lower() == FILE_ENTRY_FILES.lower():
+                self.tables_to_load = [FILE_ENTRY_FILES]
+
 
     def run(self):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
@@ -62,6 +75,7 @@ class EngineUpload(Engine):
             query.set_where_filters([COLUMN_ENTRY_OWNER + "='" + self.owner + "'"])
             res = self.connection.execute(str(query))
             result = result and res
+        self.log.log(self.engine_name, "Finished deleting Metadata Entry on database", LOG_LEVEL_INFO)
         return result
 
     def add_owner_at_end_each_row(self, file: list[list]):
@@ -84,6 +98,7 @@ class EngineUpload(Engine):
             file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
                                           FILE_ENTRY_AGGREGATORS + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
+
             all_rows = self.add_owner_at_end_each_row(file)
             res = metadata.add_entry_aggregators(all_rows)
             result = result and res
@@ -234,4 +249,84 @@ class EngineUpload(Engine):
             res = self.connection.execute(str(query_values))
             result = result and res
 
+        # ENTRY_DV_ENTITY
+        if FILE_ENTRY_DV_ENTITY in self.entry_files_to_load:
+            file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
+            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+                                          FILE_ENTRY_DV_ENTITY + "." + FILE_TYPE_CSV)
+            file = file_reader.read_file()
+            all_rows = self.add_owner_at_end_each_row(file)
+            res = metadata.add_entry_dv_entity(all_rows)
+            result = result and res
+            query_values = Query()
+            query_values.set_database(connection_type)
+            query_values.set_has_header(True)
+            query_values.set_type(QUERY_TYPE_VALUES)
+            query_values.set_target_table(TABLE_ENTRY_DV_ENTITY)
+            query_values.set_insert_columns(COLUMNS_ENTRY_DV_ENTITY)
+            query_values.set_values(metadata.entry_dv_entity)
+            self.log.log(self.engine_name, "Loading: " + TABLE_ENTRY_DV_ENTITY, LOG_LEVEL_INFO)
+            res = self.connection.execute(str(query_values))
+            result = result and res
+
+        # ENTRY_DV_MAPPINGS
+        if FILE_ENTRY_DV_MAPPINGS in self.entry_files_to_load:
+            file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
+            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_DV_MAPPINGS + "." + FILE_TYPE_CSV)
+            file = file_reader.read_file()
+            all_rows = self.add_owner_at_end_each_row(file)
+            res = metadata.add_entry_dv_mappings(all_rows)
+            result = result and res
+            query_values = Query()
+            query_values.set_database(connection_type)
+            query_values.set_has_header(True)
+            query_values.set_type(QUERY_TYPE_VALUES)
+            query_values.set_target_table(TABLE_ENTRY_DV_MAPPINGS)
+            query_values.set_insert_columns(COLUMNS_ENTRY_DV_MAPPINGS)
+            query_values.set_values(metadata.entry_dv_mappings)
+            self.log.log(self.engine_name, "Loading: " + TABLE_ENTRY_DV_MAPPINGS, LOG_LEVEL_INFO)
+            res = self.connection.execute(str(query_values))
+            result = result and res
+
+        # ENTRY_DV_PROPERTIES
+        if FILE_ENTRY_DV_PROPERTIES in self.entry_files_to_load:
+            file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
+            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+                                          FILE_ENTRY_DV_PROPERTIES + "." + FILE_TYPE_CSV)
+            file = file_reader.read_file()
+            all_rows = self.add_owner_at_end_each_row(file)
+            res = metadata.add_entry_dv_properties(all_rows)
+            result = result and res
+            query_values = Query()
+            query_values.set_database(connection_type)
+            query_values.set_has_header(True)
+            query_values.set_type(QUERY_TYPE_VALUES)
+            query_values.set_target_table(TABLE_ENTRY_DV_PROPERTIES)
+            query_values.set_insert_columns(COLUMNS_ENTRY_DV_PROPERTIES)
+            query_values.set_values(metadata.entry_dv_properties)
+            self.log.log(self.engine_name, "Loading: " + TABLE_ENTRY_DV_PROPERTIES, LOG_LEVEL_INFO)
+            res = self.connection.execute(str(query_values))
+            result = result and res
+
+        # ENTRY_FILES
+        if FILE_ENTRY_FILES in self.entry_files_to_load:
+            file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
+            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+                                          FILE_ENTRY_FILES + "." + FILE_TYPE_CSV)
+            file = file_reader.read_file()
+            all_rows = self.add_owner_at_end_each_row(file)
+            res = metadata.add_entry_files(all_rows)
+            result = result and res
+            query_values = Query()
+            query_values.set_database(connection_type)
+            query_values.set_has_header(True)
+            query_values.set_type(QUERY_TYPE_VALUES)
+            query_values.set_target_table(TABLE_ENTRY_FILES)
+            query_values.set_insert_columns(COLUMNS_ENTRY_FILES)
+            query_values.set_values(metadata.entry_files)
+            self.log.log(self.engine_name, "Loading: " + TABLE_ENTRY_FILES, LOG_LEVEL_INFO)
+            res = self.connection.execute(str(query_values))
+            result = result and res
+
+        self.log.log(self.engine_name, "Finished uploading Metadata Entry on database", LOG_LEVEL_INFO)
         return result

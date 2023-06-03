@@ -34,6 +34,17 @@ def get_metadata_from_database(connection: Connection, log: Log, owner: str, loa
         if res is False: return None
         log.log("Metadata Loader", "Finished to load [OM_DATASET]", LOG_LEVEL_DEBUG)
 
+        # OM_DATASET_DV
+        log.log("Metadata Loader", "Start to load [OM_DATASET_DV]", LOG_LEVEL_DEBUG)
+        query.set_from_tables(TABLE_OM_DATASET_DV)
+        query.set_select_columns(COLUMNS_OM_DATASET_DV)
+        res = connection.execute(str(query))
+        if res is False: return None
+        data = connection.get_query_result()
+        res = metadata.add_om_dataset_dv(data)
+        if res is False: return None
+        log.log("Metadata Loader", "Finished to load [OM_DATASET_DV]", LOG_LEVEL_DEBUG)
+
         # OM_DATASET_EXECUTION
         log.log("Metadata Loader", "Start to load [OM_DATASET_EXECUTION]", LOG_LEVEL_DEBUG)
         query.set_from_tables(TABLE_OM_DATASET_EXECUTION)
@@ -144,6 +155,17 @@ def get_metadata_from_database(connection: Connection, log: Log, owner: str, loa
         if res is False: return None
         log.log("Metadata Loader", "Finished to load [OM_DATASET_RELATIONSHIPS]", LOG_LEVEL_DEBUG)
 
+        # OM_DATASET_FILE
+        log.log("Metadata Loader", "Start to load [OM_DATASET_FILE]", LOG_LEVEL_DEBUG)
+        query.set_from_tables(TABLE_OM_DATASET_FILE)
+        query.set_select_columns(COLUMNS_OM_DATASET_FILE)
+        res = connection.execute(str(query))
+        if res is False: return None
+        data = connection.get_query_result()
+        res = metadata.add_om_dataset_file(data)
+        if res is False: return None
+        log.log("Metadata Loader", "Finished to load [OM_DATASET_FILE]", LOG_LEVEL_DEBUG)
+
         # OM_DATASET_HARDCODED
         log.log("Metadata Loader", "Start to load [OM_DATASET_HARDCODED]", LOG_LEVEL_DEBUG)
         query.set_from_tables(TABLE_OM_DATASET_HARDCODED)
@@ -166,6 +188,7 @@ def get_metadata_from_database(connection: Connection, log: Log, owner: str, loa
         res = metadata.add_om_properties(data)
         if res is False: return None
         log.log("Metadata Loader", "Finished to load [OM_PROPERTIES]", LOG_LEVEL_DEBUG)
+
 
     if load_ref:
         query.set_where_filters(None)
@@ -328,7 +351,7 @@ def get_metadata_from_database(connection: Connection, log: Log, owner: str, loa
         if res is False: return None
         log.log("Metadata Loader", "Finished to load [ENTRY_DATASET_MAPPINGS]", LOG_LEVEL_DEBUG)
 
-        # ENTRY_DATASET_MAPPINGS
+        # ENTRY_DV_MAPPINGS
         log.log("Metadata Loader", "Start to load [ENTRY_DV_MAPPINGS]", LOG_LEVEL_DEBUG)
         query.set_from_tables(TABLE_ENTRY_DV_MAPPINGS)
         query.set_select_columns(COLUMNS_ENTRY_DV_MAPPINGS)
@@ -339,8 +362,8 @@ def get_metadata_from_database(connection: Connection, log: Log, owner: str, loa
         if res is False: return None
         log.log("Metadata Loader", "Finished to load [ENTRY_DV_MAPPINGS]", LOG_LEVEL_DEBUG)
 
-        # ENTRY_DATASET_MAPPINGS
-        log.log("Metadata Loader", "Start to load [ENTRY_DV_MAPPINGS]", LOG_LEVEL_DEBUG)
+        # ENTRY_DV_ENTITY
+        log.log("Metadata Loader", "Start to load [TABLE_ENTRY_DV_ENTITY]", LOG_LEVEL_DEBUG)
         query.set_from_tables(TABLE_ENTRY_DV_ENTITY)
         query.set_select_columns(COLUMNS_ENTRY_DV_ENTITY)
         res = connection.execute(str(query))
@@ -348,7 +371,29 @@ def get_metadata_from_database(connection: Connection, log: Log, owner: str, loa
         data = connection.get_query_result()
         res = metadata.add_entry_dv_entity(data)
         if res is False: return None
-        log.log("Metadata Loader", "Finished to load [ENTRY_DV_MAPPINGS]", LOG_LEVEL_DEBUG)
+        log.log("Metadata Loader", "Finished to load [TABLE_ENTRY_DV_ENTITY]", LOG_LEVEL_DEBUG)
+
+        # ENTRY_DV_PROPERTIES
+        log.log("Metadata Loader", "Start to load [TABLE_ENTRY_DV_PROPERTIES]", LOG_LEVEL_DEBUG)
+        query.set_from_tables(TABLE_ENTRY_DV_PROPERTIES)
+        query.set_select_columns(COLUMNS_ENTRY_DV_PROPERTIES)
+        res = connection.execute(str(query))
+        if res is False: return None
+        data = connection.get_query_result()
+        res = metadata.add_entry_dv_properties(data)
+        if res is False: return None
+        log.log("Metadata Loader", "Finished to load [TABLE_ENTRY_DV_PROPERTIES]", LOG_LEVEL_DEBUG)
+
+        # ENTRY_FILES
+        log.log("Metadata Loader", "Start to load [TABLE_ENTRY_FILES]", LOG_LEVEL_DEBUG)
+        query.set_from_tables(TABLE_ENTRY_FILES)
+        query.set_select_columns(COLUMNS_ENTRY_FILES)
+        res = connection.execute(str(query))
+        if res is False: return None
+        data = connection.get_query_result()
+        res = metadata.add_entry_files(data)
+        if res is False: return None
+        log.log("Metadata Loader", "Finished to load [TABLE_ENTRY_FILES]", LOG_LEVEL_DEBUG)
 
     if load_im:
         where_filter = COLUMN_OM_OWNER + "='" + owner + "'"
@@ -426,7 +471,7 @@ def get_list_nodes_from_metadata(metadata: Metadata, log: Log, dataset_name: str
                 with_to_get_source = metadata.get_dataset_from_dataset_name(src)
                 from_tables.extend(get_sources_from_dataset_with(metadata, with_to_get_source))
 
-        if dataset.dataset_name in from_tables: from_tables.remove(dataset.dataset_name)
+        if dataset.dataset_name in from_tables: from_tables = [i for i in from_tables if i != dataset.dataset_name]
         from_tables = list(dict.fromkeys(from_tables))
 
 
@@ -468,9 +513,18 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
 
     # Create table
     columns_specs = []
-    for dataset_spec in [x for x in metadata.om_dataset_specification if x.end_date is None and x.id_dataset == dataset.id_dataset]:
-        columns_specs.append(dataset_spec.column_name + " " + dataset_spec.column_type)
-
+    all_dataset_specs_from_dataset = [x for x in metadata.om_dataset_specification if x.end_date is None and x.id_dataset == dataset.id_dataset]
+    all_dataset_specs_from_dataset.sort(key=lambda x: x.ordinal_position)
+    for dataset_spec in all_dataset_specs_from_dataset:
+        length_details = ''
+        if dataset_spec.column_length != 0 and dataset_spec.column_length is not None:
+            length_details = "(" + str(dataset_spec.column_length) + ")"
+        if dataset_spec.column_precision != 0 and dataset_spec.column_precision is not None:
+            if dataset_spec.column_scale != 0 and dataset_spec.column_scale is not None:
+                length_details = "(" + str(dataset_spec.column_scale) + ","+str(dataset_spec.column_scale)+")"
+            else:
+                length_details = "(" + str(dataset_spec.column_scale)+ ")"
+        columns_specs.append(dataset_spec.column_name + " " + dataset_spec.column_type+length_details)
     query = Query()
 
     for num_branch in range(0,num_branches):
@@ -513,20 +567,21 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
         new_dataset = metadata.get_dataset_from_dataset_name(dataset.dataset_name)
         for dataset_spec in Sort_Dataset_Specification_By_Ordinal_Position([x for x in metadata.om_dataset_specification if x.end_date is None and new_dataset.id_dataset == x.id_dataset]):
             dataset_t_mapping = metadata.get_dataset_t_mapping_from_id_branch_and_id_dataset_spec(num_branch+1, dataset_spec.id_dataset_spec)
+            if dataset_t_mapping is None: continue # If the mapping on that branch has been closed
             new_select_column = dataset_t_mapping.value_mapping
             all_columns = re.findall(r'\[(\d+)\]', new_select_column)
             for col in all_columns:
                 new_select_column = new_select_column.replace("[" + col + "]",
-                                                              metadata.get_tables_dot_column_from_id_dataset_spec(
-                                                                  col))
+                                                              metadata.get_tables_dot_column_from_id_dataset_spec(col))
             new_select_column += ' AS ' + metadata.get_dataset_spec_from_id_dataset_spec(dataset_t_mapping.id_dataset_spec).column_name
             select_columns.append(new_select_column)
 
+
         # DISTINCT option
-        distinct = False
+        is_distinct = False
         for distinct in [x for x in metadata.om_dataset_t_distinct if x.end_date is None]:
             if distinct.id_dataset == dataset.id_dataset and distinct.id_branch == (num_branch+1):
-                if distinct.sw_distinct == 1: distinct = True
+                if distinct.sw_distinct == 1: is_distinct = True
 
         # ORDER Columns
         all_id_dataset_spec = metadata.get_list_id_dataset_spec_from_dataset_name(dataset.dataset_name)
@@ -581,7 +636,7 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
             if is_with: query.set_type(QUERY_TYPE_SELECT)
             query.set_select_columns(select_columns)
             query.set_from_tables(from_tables)
-            query.set_is_distinct(distinct)
+            query.set_is_distinct(is_distinct)
             query.set_from_tables_and_relations(tables_and_relations)
             query.set_insert_columns(insert_columns)
             query.set_order_by_columns(order_columns)
@@ -590,22 +645,23 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
             query.set_primary_key(pk_columns)
             query.set_where_filters(where_filters)
         else:
+
             query_union = Query()
             query_union.set_name_query(target_table)
             query_union.set_target_table(target_table)
             query_union.set_is_with(False)
             query_union.set_select_columns(select_columns)
             query_union.set_from_tables(from_tables)
-            query.set_is_distinct(distinct)
+            query_union.set_is_distinct(is_distinct)
             query_union.set_from_tables_and_relations(tables_and_relations)
             query_union.set_order_by_columns(order_columns)
-            query.set_having_filters(having_filters)
+            query_union.set_having_filters(having_filters)
             query_union.set_group_by_columns(agg_columns)
-            query.set_primary_key(pk_columns)
+            query_union.set_primary_key(pk_columns)
             query_union.set_type(QUERY_TYPE_SELECT)
-            query.set_where_filters(where_filters)
-
-            query.add_unionquery(query_union)
+            query_union.set_where_filters(where_filters)
+            if len(select_columns) != 0:
+                query.add_unionquery(query_union)
 
 
     return query

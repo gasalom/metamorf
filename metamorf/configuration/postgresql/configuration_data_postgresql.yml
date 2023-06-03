@@ -1,0 +1,6 @@
+data:
+  connection_type: 'PostgreSQL'
+  postgres_user: ''
+  postgres_password: ''
+  postgres_host: ''
+  postgres_database: 'metamorf_data_example'

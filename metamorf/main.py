@@ -16,6 +16,8 @@ from metamorf.engines.engine_backup import EngineBackup
 from metamorf.engines.engine_manifest import EngineManifest
 from metamorf.engines.engine_api import EngineApi
 from metamorf.engines.engine_restore import EngineRestore
+from metamorf.engines.engine_files import EngineFiles
+from metamorf.engines.engine_metadata import EngineMetadata
 from metamorf.tools.argparser import ArgParser
 from metamorf.engines.engine_commit import EngineCommit
 from metamorf.help import print_help
@@ -84,6 +86,12 @@ def main():
         engine.run()
     elif arguments['command'] == 'restore':
         engine = EngineRestore(log, arguments)
+        engine.run()
+    elif arguments['command'] == 'files':
+        engine = EngineFiles(log, arguments)
+        engine.run()
+    elif arguments['command'] == 'metadata':
+        engine = EngineMetadata(log, arguments)
         engine.run()
     else:
         log.log('METAMORF', 'Command under development. More information at https://www.metamorf.io', LOG_LEVEL_CRITICAL)

@@ -18,8 +18,11 @@ class Metadata:
         self.entry_dataset_mappings = []
         self.entry_dv_entity = []
         self.entry_dv_mappings = []
+        self.entry_dv_properties = []
+        self.entry_files = []
         # Metamorf Tables
         self.om_dataset = []
+        self.om_dataset_dv = []
         self.om_dataset_execution = []
         self.om_dataset_t_order = []
         self.om_dataset_t_agg = []
@@ -32,6 +35,7 @@ class Metadata:
         self.om_dataset_t_having = []
         self.om_properties = []
         self.om_dataset_hardcoded = []
+        self.om_dataset_file = []
         # Reference Tables
         self.om_ref_query_type = []
         self.om_ref_order_type = []
@@ -73,6 +77,15 @@ class Metadata:
                 return False
         return True
 
+    def add_entry_files(self, entry_files_list: list):
+        for entry_files in entry_files_list:
+            try:
+                self.entry_files.append(EntryFiles(entry_files[0], entry_files[1], entry_files[2], entry_files[3], entry_files[4]))
+            except Exception as e:
+                self.log.log("Metadata Loader", "Error loading [Entry Files]: " + str(e), LOG_LEVEL_ERROR)
+                return False
+        return True
+
     def add_entry_having(self, entry_having_list: list):
         for entry_having in entry_having_list:
             try:
@@ -87,7 +100,7 @@ class Metadata:
             try:
                 self.entry_dataset_relationship.append(EntryDatasetRelationships(entry_dataset_relationship[0], entry_dataset_relationship[1], entry_dataset_relationship[2], entry_dataset_relationship[3], entry_dataset_relationship[4], entry_dataset_relationship[5]))
             except Exception as e:
-                self.log.log("Metadata Loader", "Error loading [Entry Order]: " + str(e), LOG_LEVEL_ERROR)
+                self.log.log("Metadata Loader", "Error loading [Entry Relationship]: " + str(e), LOG_LEVEL_ERROR)
                 return False
         return True
 
@@ -121,7 +134,7 @@ class Metadata:
     def add_entry_dv_entity(self, entry_dv_entity_list: list):
         for entry_dv_entity in entry_dv_entity_list:
             try:
-                self.entry_dv_entity.append(EntryDvEntry(entry_dv_entity[0],entry_dv_entity[1],entry_dv_entity[2],entry_dv_entity[3],entry_dv_entity[4],entry_dv_entity[5],entry_dv_entity[6],entry_dv_entity[7],entry_dv_entity[8],entry_dv_entity[9],entry_dv_entity[10]))
+                self.entry_dv_entity.append(EntryDvEntry(entry_dv_entity[0],entry_dv_entity[1],entry_dv_entity[2],entry_dv_entity[3],entry_dv_entity[4],entry_dv_entity[5],entry_dv_entity[6],entry_dv_entity[7]))
             except Exception as e:
                 self.log.log("Metadata Loader", "Error loading [Entry DV Entity]: " + str(e), LOG_LEVEL_ERROR)
                 return False
@@ -130,7 +143,16 @@ class Metadata:
     def add_entry_dv_mappings(self, entry_dv_mappings_list: list):
         for entry_dv_mappings in entry_dv_mappings_list:
             try:
-                self.entry_dv_mappings.append(EntryDvMappings(entry_dv_mappings[0],entry_dv_mappings[1],entry_dv_mappings[2],entry_dv_mappings[3],entry_dv_mappings[4],entry_dv_mappings[5],entry_dv_mappings[6],entry_dv_mappings[7],entry_dv_mappings[8],entry_dv_mappings[9]))
+                self.entry_dv_mappings.append(EntryDvMappings(entry_dv_mappings[0],entry_dv_mappings[1],entry_dv_mappings[2],entry_dv_mappings[3],entry_dv_mappings[4],entry_dv_mappings[5],entry_dv_mappings[6],entry_dv_mappings[7],entry_dv_mappings[8],entry_dv_mappings[9],entry_dv_mappings[10],entry_dv_mappings[11],entry_dv_mappings[12],entry_dv_mappings[13],entry_dv_mappings[14],entry_dv_mappings[15]))
+            except Exception as e:
+                self.log.log("Metadata Loader", "Error loading [Entry DV Mappings]: " + str(e), LOG_LEVEL_ERROR)
+                return False
+        return True
+
+    def add_entry_dv_properties(self, entry_dv_properties_list: list):
+        for entry_dv_properties in entry_dv_properties_list:
+            try:
+                self.entry_dv_properties.append(EntryDvProperties(entry_dv_properties[0],entry_dv_properties[1],entry_dv_properties[2],entry_dv_properties[3]))
             except Exception as e:
                 self.log.log("Metadata Loader", "Error loading [Entry DV Mappings]: " + str(e), LOG_LEVEL_ERROR)
                 return False
@@ -142,6 +164,15 @@ class Metadata:
                 self.om_dataset.append(OmDataset(om_dataset[0],om_dataset[1],om_dataset[2],om_dataset[3],om_dataset[4],om_dataset[5],om_dataset[6]))
             except Exception as e:
                 self.log.log("Metadata Loader", "Error loading [Dataset]: " + str(e), LOG_LEVEL_ERROR)
+                return False
+        return True
+
+    def add_om_dataset_dv(self, om_dataset_dv_list: list):
+        for om_dataset_dv in om_dataset_dv_list:
+            try:
+                self.om_dataset_dv.append(OmDatasetDv(om_dataset_dv[0],om_dataset_dv[1],om_dataset_dv[2],om_dataset_dv[3],om_dataset_dv[4]))
+            except Exception as e:
+                self.log.log("Metadata Loader", "Error loading [Dataset DV]: " + str(e), LOG_LEVEL_ERROR)
                 return False
         return True
 
@@ -321,7 +352,16 @@ class Metadata:
             try:
                 self.om_relationships.append(OmRelationships(om_relationships[0],om_relationships[1],om_relationships[2],om_relationships[3],om_relationships[4],om_relationships[5],om_relationships[6],om_relationships[7],om_relationships[8],om_relationships[9]))
             except Exception as e:
-                self.log.log("Metadata Loader", "Error loading [Relationships]: " + str(e), LOG_LEVEL_ERROR)
+                self.log.log("Metadata Loader", "Error loading [Dataset Relationships]: " + str(e), LOG_LEVEL_ERROR)
+                return False
+        return True
+
+    def add_om_dataset_file(self, om_dataset_file_list):
+        for om_dataset_file in om_dataset_file_list:
+            try:
+                self.om_dataset_file.append(OmDatasetFile(om_dataset_file[0],om_dataset_file[1],om_dataset_file[2],om_dataset_file[3],om_dataset_file[4],om_dataset_file[5],om_dataset_file[6]))
+            except Exception as e:
+                self.log.log("Metadata Loader", "Error loading [Dataset File]: " + str(e), LOG_LEVEL_ERROR)
                 return False
         return True
 
@@ -335,14 +375,53 @@ class Metadata:
         return True
 
     def get_dataset_from_dataset_name(self, dataset):
-        """Return ID_DATASET from DATASET_NAME. If not exists returns -1"""
+        """Return ID_DATASET from DATASET_NAME. If not exists returns None"""
         for d in self.om_dataset:
             if d.dataset_name == dataset and (d.end_date is None or d.end_date == 'NULL'): return d
         return None
 
+    def get_entry_entity_from_cod_entity(self, cod_entity):
+        for d in self.entry_entity:
+            if d.cod_entity == cod_entity: return d
+        return None
+
+    def get_num_branches_on_entry_dv_from_cod_entity_name(self, cod_entity_name):
+        num_branches = 0
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target != cod_entity_name: continue
+            if d.num_branch > num_branches: num_branches = d.num_branch
+        return num_branches
+
+    def get_num_connections_on_entry_dv_from_cod_entity_name(self, cod_entity_name):
+        num_connection = 0
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target != cod_entity_name: continue
+            if d.num_connection > num_connection: num_connection = d.num_connection
+        return num_connection
+
+    def get_all_bk_from_entry_dv_cod_entity_target_and_num_branch(self, cod_entity, num_branch):
+        all_bk = []
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target != cod_entity or d.num_branch != num_branch: continue
+            if d.key_type.upper() == KEY_TYPE_BUSINESS_KEY or d.key_type.upper() == KEY_TYPE_DRIVENKEY: all_bk.append(d)
+        return all_bk
+
+    def get_all_bk_from_entry_dv_cod_entity_target_and_num_branch_and_num_connection(self, cod_entity, num_branch, num_connection):
+        all_bk = []
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target != cod_entity or d.num_branch != num_branch or d.num_connection != num_connection: continue
+            if d.key_type.upper() == KEY_TYPE_BUSINESS_KEY or d.key_type.upper() == KEY_TYPE_DRIVENKEY:all_bk.append(d)
+        return all_bk
+
+
     def get_dataset_execution_from_id_dataset(self, id_dataset):
         for execution in self.om_dataset_execution:
             if execution.id_dataset == id_dataset and (execution.end_date is None or execution.end_date == 'NULL'): return execution
+        return None
+
+    def get_dataset_dv_from_id_dataset(self, id_dataset):
+        for dataset_dv in self.om_dataset_dv:
+            if dataset_dv.id_dataset == id_dataset and (dataset_dv.end_date is None or dataset_dv.end_date == 'NULL'): return dataset_dv
         return None
 
     def get_path_from_database_and_schema(self, database, schema):
@@ -384,9 +463,8 @@ class Metadata:
         columns_name_added = []
         for col in self.entry_dataset_mappings:
             if col.cod_entity_target == cod_entity:
-                pk = 0
-                if col.key_type == KEY_TYPE_PRIMARY_KEY: pk = 1
-                columna = Column(col.ordinal_position, col.column_name_target, col.column_type_target, None, pk, 0,col.length,col.precision,0)
+                if col.key_type is None: col.key_type = "NULL"
+                columna = Column(col.ordinal_position, col.column_name_target, col.column_type_target, None, col.key_type, 0,col.column_length,col.column_precision,0)
                 if col.column_name_target not in columns_name_added:
                     all_cols.append(columna)
                     columns_name_added.append(col.column_name_target)
@@ -543,7 +621,7 @@ class Metadata:
         max_num_branch = 0
         for dataset_spec in [x for x in self.om_dataset_specification if x.end_date is None]:
             if dataset_spec.id_dataset == dataset.id_dataset:
-                for map in [x for x in self.om_dataset_t_mapping if x.end_date is None and x.id_dataset_spec == dataset_spec.id_dataset_spec]:
+                for map in [x for x in self.om_dataset_t_mapping if (x.end_date is None or x.end_date == '') and x.id_dataset_spec == dataset_spec.id_dataset_spec]:
                     if map.id_branch>max_num_branch: max_num_branch=map.id_branch
         return max_num_branch
 
@@ -576,8 +654,110 @@ class Metadata:
         if fqdn != "": fqdn += "."
         return fqdn + dataset_name
 
+    def get_record_source_on_dv_from_cod_entity_target_and_num_branch(self, cod_entity_target, num_branch):
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_RECORD_SOURCE: continue
+            if d.cod_entity_target == cod_entity_target and d.num_branch == num_branch:
+                return d
+        return None
 
+    def get_applied_date_on_dv_from_cod_entity_target(self, cod_entity_target, num_branch):
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_APPLIED_DATE: continue
+            if d.cod_entity_target == cod_entity_target and d.num_branch == num_branch:
+                return d
+        return None
 
+    def get_dependent_child_key_on_dv_from_satellite_name(self, satellite_name):
+        all_dck = []
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_DEPENDENT_CHILD_KEY: continue
+            if d.satellite_name == satellite_name: all_dck.append(d)
+        return all_dck
+
+    def get_tenant_on_dv_from_cod_entity_target_and_num_branch(self, cod_entity_target, num_branch):
+        all_tenant = []
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_TENANT: continue
+            if d.cod_entity_target == cod_entity_target and d.num_branch == num_branch:
+                all_tenant.append(d)
+        return all_tenant
+
+    def get_seq_on_dv_from_cod_entity_target_and_num_branch(self, cod_entity_target, num_branch):
+        all_seq = []
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_SEQUENCE: continue
+            if d.cod_entity_target == cod_entity_target and d.num_branch == num_branch:
+                all_seq.append(d)
+        return all_seq
+
+    def get_tenant_on_dv_from_cod_entity_target_and_num_branch_and_num_connection(self, cod_entity_target, num_branch, num_connection):
+        all_tenant = []
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_TENANT: continue
+            if d.cod_entity_target == cod_entity_target and d.num_branch == num_branch and d.num_connection == num_connection:
+                all_tenant.append(d)
+        return all_tenant
+
+    def get_attributes_on_dv_from_satellite_name(self, satellite_name):
+        all_attributes = []
+        for d in self.entry_dv_mappings:
+            if d.key_type != KEY_TYPE_ATTRIBUTE and d.key_type != KEY_TYPE_STATUS: continue
+            if d.satellite_name == satellite_name: all_attributes.append(d)
+        return all_attributes
+
+    def get_all_satellites_info_from_hub(self, cod_entity_target):
+        all_satellites = []
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target == cod_entity_target:
+                if d.satellite_name != '' and d.satellite_name != None and (d.cod_entity_source, d.cod_entity_target,d.satellite_name, d.num_branch, d.origin_is_incremental, d.origin_is_total, d.origin_is_cdc) not in all_satellites:
+                    all_satellites.append((d.cod_entity_source, d.cod_entity_target,d.satellite_name, d.num_branch, d.origin_is_incremental, d.origin_is_total, d.origin_is_cdc))
+        return all_satellites
+
+    def get_dv_properties_from_cod_entity_and_num_connection(self,cod_entity, num_connection):
+        for d in self.entry_dv_properties:
+            if d.cod_entity == cod_entity and int(d.num_connection) == int(num_connection):
+                return d
+        return None
+
+    def get_all_cod_entity_source_from_cod_entity_target_on_entry_dv(self, cod_entity):
+        all_cod_entity = []
+        all_entities = []
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target == cod_entity and d.cod_entity_source not in all_cod_entity:
+                all_cod_entity.append(d.cod_entity_source)
+                all_entities.append(d)
+        return all_entities
+
+    def get_first_entry_dv_mappings_from_cod_entity_target_and_key_type_and_num_branch(self, cod_entity, key_type, num_branch):
+        for d in self.entry_dv_mappings:
+            if d.num_branch != num_branch: continue
+            if d.cod_entity_target == cod_entity and key_type == d.key_type: return d
+        return None
+
+    def get_dict_origin_type_from_cod_entity_on_dv(self, cod_entity):
+        source_options = dict()
+        source_options['origin_is_cdc'] = 0
+        source_options['origin_is_incremental'] = 0
+        source_options['origin_is_total'] = 0
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target == cod_entity:
+                if d.origin_is_cdc == 1: source_options['origin_is_cdc'] = 1
+                if d.origin_is_incremental == 1: source_options['origin_is_incremental'] = 1
+                if d.origin_is_total == 1: source_options['origin_is_total'] = 1
+        return source_options
+
+    def get_list_num_connection_with_driven_key_from_cod_entity_target(self, cod_entity):
+        all_connections_with_dk = []
+        for d in self.entry_dv_mappings:
+            if d.cod_entity_target == cod_entity and d.key_type == KEY_TYPE_DRIVENKEY:
+                if d.num_connection not in all_connections_with_dk: all_connections_with_dk.append(d.num_connection)
+        return all_connections_with_dk
+
+    def get_om_dataset_file_from_id_dataset(self, id_dataset):
+        for d in self.om_dataset_file:
+            if d.id_dataset == id_dataset: return d
+        return None
 
 
 

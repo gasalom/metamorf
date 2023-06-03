@@ -4,7 +4,7 @@ modules:
   - name: 'elt'
     status: 'ACTIVE'
   - name: 'datavault'
-    status: 'INACTIVE'
+    status: 'ACTIVE'
     char_separator_naming: '_'
 output:
   type: 'sql'

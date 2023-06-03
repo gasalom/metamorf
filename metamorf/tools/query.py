@@ -27,6 +27,7 @@ class Query:
         self.database = None
         self.is_truncate = False
         self.need_create_table = False
+        self.need_drop_table = False
 
     def set_database(self, database: str):
         '''Set the Target database of the query. Use the constants CONNECTION_[X]'''
@@ -34,6 +35,9 @@ class Query:
 
     def set_need_create_table(self, option):
         self.need_create_table = option
+
+    def set_need_drop_table(self, option):
+        self.need_drop_table = option
 
     def set_is_truncate(self, is_truncate):
         self.is_truncate = is_truncate
@@ -127,6 +131,15 @@ class Query:
         dataset = dataset_name.split(".")
         return dataset[len(dataset)-1]
 
+    def _get_all_from_tables_from_query(self, query: Query):
+        all_from_tables = []
+        for x in query.from_tables:
+            if x not in all_from_tables: all_from_tables.append(x)
+        for x in query.from_tables_and_relations:
+            if x.master_table not in all_from_tables: all_from_tables.append(x.master_table)
+            if x.detail_table not in all_from_tables: all_from_tables.append(x.detail_table)
+        return all_from_tables
+
     def __str__(self):
         query = ""
         all_from_tables = ""
@@ -139,6 +152,33 @@ class Query:
         all_values = ""
 
         self.validate_query_elements()
+
+        # Order WITH queries
+        all_with_queries = self.subqueries.copy()
+        all_with_to_be_processed = [] # all with that need to be processed
+        for q in self.subqueries:
+            if q.name_query not in all_with_to_be_processed: all_with_to_be_processed.append(q.name_query)
+        all_with_to_be_processed = set(all_with_to_be_processed)
+        index = 0
+        all_with_ordered = [] # all_query_objects ordered
+        with_added = [] # all with names that have been already added
+        while all_with_queries:
+            with_query = all_with_queries[index]
+            all_from_tab = self._get_all_from_tables_from_query(with_query)
+            for with_processed in with_added:
+                if with_processed in all_from_tab: all_from_tab.remove(with_processed)
+            set_all_from_tables = set(all_from_tab)
+            result_intersection = list(set_all_from_tables.intersection(all_with_to_be_processed))
+            if len(result_intersection)==0:
+                all_with_ordered.append(with_query)
+                with_added.append(with_query.name_query)
+                all_with_queries.remove(with_query)
+                index = 0
+            else:
+                index +=1
+
+        self.subqueries = all_with_ordered.copy()
+        self.subqueries.reverse()
 
         # SELECT
         all_select_columns += ','.join([str(col) for col in self.select_columns])
@@ -159,17 +199,18 @@ class Query:
         while len(all_relation_to_include) > 0:
             relation = all_relation_to_include[pos]
             if not includedTables: # If it's the first relation, we include it
-
                 all_relations_same_tables = []
+                relations_to_delete = []
                 for rel in all_relation_to_include:
                     if relation.master_table == rel.master_table and relation.detail_table == rel.detail_table:
-                        if rel!=relation: all_relation_to_include.remove(rel)
+                        if rel != relation: relations_to_delete.append(rel)
                         all_relations_same_tables.append(rel)
+                for rel in relations_to_delete: all_relation_to_include.remove(rel)
 
                 all_from_tables += relation.master_table + " "+ self.get_dataset_name_from_fqdn(relation.master_table) + " " + self.get_join_from_id(relation.join_type) + " " + relation.detail_table + " " + self.get_dataset_name_from_fqdn(relation.detail_table) + " ON "
 
                 for rel in all_relations_same_tables:
-                   all_from_tables += self.get_dataset_name_from_fqdn(rel.master_table) + "." + rel.master_column + " " + rel.join_sign + " " + self.get_dataset_name_from_fqdn(rel.detail_table) + "." + rel.detail_column + " AND "
+                    all_from_tables += self.get_dataset_name_from_fqdn(rel.master_table) + "." + rel.master_column + " " + rel.join_sign + " " + self.get_dataset_name_from_fqdn(rel.detail_table) + "." + rel.detail_column + " AND "
 
                 all_from_tables = all_from_tables[:-4] + "\n"
                 includedTables.append(relation.master_table)
@@ -181,10 +222,12 @@ class Query:
 
                 if relation.master_table in includedTables:
                     all_relations_same_tables = []
+                    relations_to_delete = []
                     for rel in all_relation_to_include:
                         if relation.master_table == rel.master_table and relation.detail_table == rel.detail_table:
-                            if rel != relation: all_relation_to_include.remove(rel)
+                            if rel != relation: relations_to_delete.append(rel)
                             all_relations_same_tables.append(rel)
+                    for rel in relations_to_delete: all_relation_to_include.remove(rel)
 
                     all_from_tables += self.get_join_from_id(relation.join_type) + " " + relation.detail_table + " " + self.get_dataset_name_from_fqdn(relation.detail_table) + " ON "
                     for rel in all_relations_same_tables:
@@ -202,10 +245,12 @@ class Query:
                     else: joinType = relation.join_type
 
                     all_relations_same_tables = []
+                    relations_to_delete = []
                     for rel in all_relation_to_include:
                         if relation.master_table == rel.master_table and relation.detail_table == rel.detail_table:
-                            if rel != relation: all_relation_to_include.remove(rel)
+                            if rel != relation: relations_to_delete.append(rel)
                             all_relations_same_tables.append(rel)
+                    for rel in relations_to_delete: all_relation_to_include.remove(rel)
 
                     all_from_tables += self.get_join_from_id(joinType) + " " + relation.master_table + " " + self.get_dataset_name_from_fqdn(relation.master_table)+ " ON "
                     for rel in all_relations_same_tables:
@@ -262,11 +307,13 @@ class Query:
             values_list.append(all_values)
 
         #######################################################################################
+        if self.need_drop_table:
+            query += "DROP TABLE " + self.target_table + ";\n\n"
+
         if self.need_create_table:
             query += "CREATE TABLE "+ self.target_table +" (\n"
             for col in self.columns_and_specs:
                 query += col + ",\n"
-            pass
             query = query[:-2]
             query+=");\n\n"
 
@@ -319,6 +366,13 @@ class Query:
             if len(self.values) <= 1 and self.has_header: query = ""
             if len(values_list)==0: query = ""
 
+            if (len(self.values) <= 1 and self.has_header) or len(values_list)==0:
+                if self.need_drop_table:
+                    if self.database.upper() == CONNECTION_SQLITE.upper():
+                        query += "DELETE FROM " + self.target_table + ";\n\n"
+                    else:
+                        query += "TRUNCATE TABLE " + self.target_table + ";\n\n"
+
         if self.type == QUERY_TYPE_DELETE:
             where = ""
             if len(self.where_filters)>1:
@@ -353,7 +407,7 @@ class Query:
         elif id == JOIN_TYPE_DETAIL:
             result = "RIGHT JOIN"
         elif id == JOIN_TYPE_OUTER:
-            result = "OUTER JOIN"
+            result = "FULL OUTER JOIN"
         else:
             raise ValueError("Join doesn't exist")
         return result

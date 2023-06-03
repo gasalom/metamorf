@@ -115,18 +115,35 @@ class EntryPath:
         if self.schema_name is not None and self.schema_name != '': schema_name = "'" + self.schema_name + "'"
         return "'"+self.cod_path+"'," + database_name+","+schema_name+",'"+self.owner + "'"
 
+class EntryFiles:
+
+    def __init__(self, cod_entity: str, file_path: str, file_name: str, delimiter_character: str, owner: str):
+        self.cod_entity = cod_entity
+        self.file_path = file_path
+        self.file_name = file_name
+        self.delimiter_character = delimiter_character
+        self.owner = owner
+
+    def get(self):
+        return [self.cod_entity, self.file_path, self.file_name, self.delimiter_character, self.owner]
+
+    def __str__(self):
+        delimiter_character = 'NULL'
+        if self.delimiter_character is not None and self.delimiter_character != '': delimiter_character = "'"+self.delimiter_character + "'"
+        return "'"+self.cod_entity+"','" + self.file_path + "','" + self.file_name+"',"+delimiter_character+",'"+self.owner + "'"
+
 
 class EntryDatasetMappings:
 
-    def __init__(self, cod_entity_source: str, value_source: str, cod_entity_target: str, column_name_target: str, column_type_target: str, ordinal_position: int, length : int, precision: int, num_branch: int, key_type: str, sw_distinct: int, owner: str):
+    def __init__(self, cod_entity_source: str, value_source: str, cod_entity_target: str, column_name_target: str, column_type_target: str, ordinal_position: int, column_length : int, column_precision: int, num_branch: int, key_type: str, sw_distinct: int, owner: str):
         self.cod_entity_source = cod_entity_source
         self.value_source = value_source
         self.cod_entity_target = cod_entity_target
         self.column_name_target = column_name_target
         self.column_type_target = column_type_target
         self.ordinal_position = ordinal_position
-        self.length = length
-        self.precision = precision
+        self.column_length = column_length
+        self.column_precision = column_precision
         self.num_branch = num_branch
         self.key_type = key_type
         self.sw_distinct = sw_distinct
@@ -134,59 +151,74 @@ class EntryDatasetMappings:
 
     def get(self):
         return [self.cod_entity_source, self.value_source, self.cod_entity_target, self.column_name_target,
-                self.column_type_target, self.ordinal_position, self.length, self.precision, self.num_branch,
+                self.column_type_target, self.ordinal_position, self.column_length, self.column_precision, self.num_branch,
                 self.key_type, self.sw_distinct, self.owner]
 
     def __str__(self):
         key_type = 'NULL'
         if self.key_type is not None and self.key_type != '': key_type = "'"+self.key_type+"'"
-        return "'"+self.cod_entity_source+"','"+self.value_source.replace("'","''")+"','"+self.cod_entity_target+"','" + self.column_name_target+"','"+self.column_type_target+"',"+str(self.ordinal_position) + "," + str(self.length)+","+str(self.precision)+","+str(self.num_branch)+","+key_type+","+str(self.sw_distinct)+",'"+self.owner+"'"
+        return "'"+self.cod_entity_source+"','"+self.value_source.replace("'","''")+"','"+self.cod_entity_target+"','" + self.column_name_target+"','"+self.column_type_target+"',"+str(self.ordinal_position) + "," + str(self.column_length)+","+str(self.column_precision)+","+str(self.num_branch)+","+key_type+","+str(self.sw_distinct)+",'"+self.owner+"'"
 
 class EntryDvMappings:
 
-    def __init__(self, cod_entity, column_name_source, column_name_target, column_type_target, ordinal_position, length, precision, num_branch, key_type, satellite_name, owner):
-        self.cod_entity = cod_entity
+    def __init__(self, cod_entity_source, column_name_source, cod_entity_target,column_name_target, column_type_target, ordinal_position, column_length, column_precision, num_branch,num_connection, key_type, satellite_name, origin_is_incremental, origin_is_total, origin_is_cdc, owner):
+        self.cod_entity_source = cod_entity_source
         self.column_name_source = column_name_source
+        self.cod_entity_target = cod_entity_target
         self.column_name_target = column_name_target
         self.column_type_target = column_type_target
         self.ordinal_position = ordinal_position
-        self.length = length
-        self.precision = precision
+        self.column_length = column_length
+        self.column_precision = column_precision
         self.num_branch = num_branch
+        self.num_connection = num_connection
         self.key_type = key_type
         self.satellite_name = satellite_name
-        self.owner = owner
-
-    def get(self):
-        return [self.cod_entity, self.column_name_source, self.column_name_target,self.column_type_target,self.ordinal_position,self.length, self.precision,self.num_branch,self.key_type,self.satellite_name, self.owner]
-
-    def __str__(self):
-        return "'" + self.cod_entity +"','"+self.column_name_source+"','"+ self.column_name_target+"','"+self.column_type_target+"',"+self.ordinal_position+","+self.length+\
-                ","+self.precision + ","+ self.num_branch+",'"+self.key_type+"','"+self.satellite_name+"','"+self.owner+"'"
-
-class EntryDvEntry:
-
-    def __init__(self, cod_entity, sw_status_tracking_satellite, name_status_tracking_satellite, sw_record_tracking_satellite, name_record_tracking_satellite,
-                 sw_effectivity_satellite, name_effectivity_satellite, record_source, origin_is_incremental, origin_is_total, origin_is_cdc, owner):
-        self.cod_entity = cod_entity
-        self.sw_status_tracking_satellite = sw_status_tracking_satellite
-        self.name_status_tracking_satellite = name_status_tracking_satellite
-        self.sw_record_tracking_satellite = sw_record_tracking_satellite
-        self.name_record_tracking_satellite = name_record_tracking_satellite
-        self.sw_effectivity_satellite = sw_effectivity_satellite
-        self.name_effectivity_satellite = name_effectivity_satellite
-        self.record_source = record_source
         self.origin_is_incremental = origin_is_incremental
         self.origin_is_total = origin_is_total
         self.origin_is_cdc = origin_is_cdc
         self.owner = owner
 
     def get(self):
-        return[self.cod_entity,self.sw_status_tracking_satellite,self.name_status_tracking_satellite,self.sw_record_tracking_satellite,self.name_record_tracking_satellite,self.sw_effectivity_satellite,self.name_effectivity_satellite,self.record_source,self.origin_is_incremental,self.origin_is_total,self.origin_is_cdc, self.owner]
+        return [self.cod_entity_source, self.column_name_source, self.cod_entity_target, self.column_name_target,self.column_type_target,self.ordinal_position,self.column_length, self.column_precision,self.num_branch, self.num_connection, self.key_type,self.satellite_name,self.origin_is_incremental, self.origin_is_total, self.origin_is_cdc, self.owner]
 
     def __str__(self):
-        return "'"+self.cod_entity+"',"+self.sw_status_tracking_satellite+",'"+self.name_status_tracking_satellite+"',"+self.sw_record_tracking_satellite+",'"+self.name_record_tracking_satellite+"',"+ \
-               self.sw_effectivity_satellite+",'"+self.name_effectivity_satellite+"','"+self.record_source+"',"+self.origin_is_incremental+","+self.origin_is_total+","+self.origin_is_cdc+",'"+self.owner+"'"
+        return "'" + self.cod_entity_source +"','"+self.column_name_source.replace("'","''")+"','"+self.cod_entity_target+"','"+self.column_name_target+"','"+self.column_type_target+"',"+str(self.ordinal_position)+","+str(self.column_length)+\
+                ","+str(self.column_precision) + ","+ str(self.num_branch)+","+str(self.num_connection)+",'"+self.key_type+"','"+self.satellite_name+"',"+str(self.origin_is_incremental)+","+str(self.origin_is_total)+","+str(self.origin_is_cdc)+",'"+self.owner+"'"
+
+class EntryDvEntry:
+
+    def __init__(self, cod_entity, entity_name, entity_type, cod_path, name_status_tracking_satellite, name_record_tracking_satellite,
+                name_effectivity_satellite, owner):
+        self.cod_entity = cod_entity
+        self.entity_name = entity_name
+        self.entity_type = entity_type
+        self.cod_path = cod_path
+        self.name_status_tracking_satellite = name_status_tracking_satellite
+        self.name_record_tracking_satellite = name_record_tracking_satellite
+        self.name_effectivity_satellite = name_effectivity_satellite
+        self.owner = owner
+
+    def get(self):
+        return[self.cod_entity, self.entity_name, self.entity_type, self.cod_path, self.name_status_tracking_satellite,self.name_record_tracking_satellite,self.name_effectivity_satellite, self.owner]
+
+    def __str__(self):
+        return "'"+self.cod_entity+"','"+self.entity_name+"','"+self.entity_type+"','"+self.cod_path+"','"+self.name_status_tracking_satellite+"','"+self.name_record_tracking_satellite+"',"+ \
+               "'"+self.name_effectivity_satellite+"','"+self.owner+"'"
+
+class EntryDvProperties:
+
+    def __init__(self, cod_entity, num_connection, hash_name, owner):
+        self.cod_entity = cod_entity
+        self.num_connection = num_connection
+        self.hash_name = hash_name
+        self.owner = owner
+
+    def get(self):
+        return [self.cod_entity, self.num_connection, self.hash_name, self.owner]
+
+    def __str__(self):
+        return "'" + self.cod_entity + "'," + self.num_connection + ",'" + self.hash_name + "','" + self.owner + "'"
 
 # METADATA - Metamorf Tables
 class OmDataset:
@@ -210,10 +242,28 @@ class OmDataset:
         else: end_date = self.end_date
         return str(self.id_dataset) + ",'" + self.dataset_name + "'," + str(self.id_entity_type) + "," + str(self.id_path) + ",'" + self.meta_owner + "'," + self.start_date + "," + end_date
 
+class OmDatasetDv:
+
+    def __init__(self, id_dataset, id_entity_type, meta_owner, start_date, end_date):
+        if isinstance(start_date, datetime.datetime): start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+        if isinstance(end_date, datetime.datetime): end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+        self.id_dataset =  id_dataset
+        self.id_entity_type = id_entity_type
+        self.meta_owner = meta_owner
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def get(self):
+        return [self.id_dataset, self.id_entity_type, self.meta_owner, self.start_date, self.end_date]
+
+    def __str__(self):
+        if self.end_date is None or self.end_date == '' or self.end_date=='NULL': end_date = "NULL"
+        else: end_date = self.end_date
+        return str(self.id_dataset) + ","+ str(self.id_entity_type) +",'"+self.meta_owner +"'," + self.start_date + "," + end_date
 
 class OmDatasetSpecification:
 
-    def __init__(self, id_dataset_spec, id_dataset, id_key_type, column_name, column_type, ordinal_position, is_nullable, length, precision, scale, meta_owner, start_date, end_date):
+    def __init__(self, id_dataset_spec, id_dataset, id_key_type, column_name, column_type, ordinal_position, is_nullable, column_length, column_precision, column_scale, meta_owner, start_date, end_date):
         if isinstance(start_date, datetime.datetime): start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
         if isinstance(end_date, datetime.datetime): end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
         self.id_dataset_spec = id_dataset_spec
@@ -223,20 +273,20 @@ class OmDatasetSpecification:
         self.column_type = column_type
         self.ordinal_position = ordinal_position
         self.is_nullable = is_nullable
-        self.length = length
-        self.precision = precision
-        self.scale = scale
+        self.column_length = column_length
+        self.column_precision = column_precision
+        self.column_scale = column_scale
         self.meta_owner = meta_owner
         self.start_date = start_date
         self.end_date = end_date
 
     def get(self):
-        return [self.id_dataset_spec, self.id_dataset, self.id_key_type, self.column_name, self.column_type, self.ordinal_position, self.is_nullable, self.length, self.precision, self.scale, self.meta_owner, self.start_date, self.end_date]
+        return [self.id_dataset_spec, self.id_dataset, self.id_key_type, self.column_name, self.column_type, self.ordinal_position, self.is_nullable, self.column_length, self.column_precision, self.column_scale, self.meta_owner, self.start_date, self.end_date]
 
     def __str__(self):
         if self.end_date is None or self.end_date == '' or self.end_date=='NULL': end_date = "NULL"
         else: end_date = self.end_date
-        return str(self.id_dataset_spec) + ","+ str(self.id_dataset)+","+str(self.id_key_type)+",'"+str(self.column_name)+"','"+str(self.column_type)+"',"+str(self.ordinal_position)+","+str(self.is_nullable)+","+str(self.length)+","+str(self.precision)+","+str(self.scale)+",'"+str(self.meta_owner) + "'," + self.start_date + "," + end_date
+        return str(self.id_dataset_spec) + ","+ str(self.id_dataset)+","+str(self.id_key_type)+",'"+str(self.column_name)+"','"+str(self.column_type)+"',"+str(self.ordinal_position)+","+str(self.is_nullable)+","+str(self.column_length)+","+str(self.column_precision)+","+str(self.column_scale)+",'"+str(self.meta_owner) + "'," + self.start_date + "," + end_date
 
 
 class OmDatasetTAgg:
@@ -409,6 +459,27 @@ class OmDatasetPath:
         else: end_date = self.end_date
         return str(self.id_path)+","+database+","+schema+",'"+self.meta_owner+"',"+self.start_date+","+end_date
 
+class OmDatasetFile:
+
+    def __init__(self, id_dataset, file_path, file_name, delimiter_character, meta_owner, start_date, end_date):
+        if isinstance(start_date, datetime.datetime): start_date = start_date.strftime("%Y-%m-%d %H:%M:%S")
+        if isinstance(end_date, datetime.datetime): end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
+        self.id_dataset = id_dataset
+        self.file_path = file_path
+        self.file_name = file_name
+        self.delimiter_character = delimiter_character
+        self.meta_owner = meta_owner
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def get(self):
+        return [self.id_dataset, self.file_path ,self.file_name ,self.delimiter_character ,self.meta_owner ,self.start_date ,self.end_date]
+
+    def __str__(self):
+        if self.end_date is None or self.end_date == '' or self.end_date=='NULL': end_date = "NULL"
+        else: end_date = self.end_date
+        return str(self.id_dataset)+",'"+str(self.file_path)+"','"+self.file_name+"','"+str(self.delimiter_character)+"','"+self.meta_owner+"',"+self.start_date +","+end_date
+
 
 class OmDatasetTFilter:
 
@@ -429,7 +500,7 @@ class OmDatasetTFilter:
     def __str__(self):
         if self.end_date is None or self.end_date == '' or self.end_date=='NULL': end_date = "NULL"
         else: end_date = self.end_date
-        return str(self.id_t_filter)+","+str(self.id_dataset)+","+str(self.id_branch)+",'"+self.value_filter+"','"+self.meta_owner+"',"+self.start_date+","+end_date
+        return str(self.id_t_filter)+","+str(self.id_dataset)+","+str(self.id_branch)+",'"+self.value_filter.replace("'","''")+"','"+self.meta_owner+"',"+self.start_date+","+end_date
 
 
 class OmDatasetTHaving:
@@ -562,33 +633,33 @@ class OmRelationships:
 
 class OmDatasetSpecificationInformation:
 
-    def __init__(self, meta_owner, dataset_name, column_name, column_type, ordinal_position, is_nullable, length, precision, scale):
+    def __init__(self, meta_owner, dataset_name, column_name, column_type, ordinal_position, is_nullable, column_length, column_precision, column_scale):
         self.meta_owner = meta_owner
         self.dataset_name = dataset_name
         self.column_name = column_name
         self.column_type = column_type
         self.ordinal_position = ordinal_position
         self.is_nullable = is_nullable
-        self.length = length
-        self.precision = precision
-        self.scale = scale
+        self.column_length = column_length
+        self.column_precision = column_precision
+        self.column_scale = column_scale
 
 
 class Column:
 
-    def __init__(self, id, column_name, column_type, default_value, is_pk, is_nullable, length, precision, scale):
+    def __init__(self, id, column_name, column_type, default_value, key_type, is_nullable, column_length, column_precision, column_scale):
         self.id = id
         self.column_name = column_name
         self.column_type = column_type
         self.default_value = default_value
-        self.is_pk = is_pk
+        self.key_type = key_type
         self.is_nullable = is_nullable
-        self.length = length
-        self.precision = precision
-        self.scale = scale
+        self.column_length = column_length
+        self.column_precision = column_precision
+        self.column_scale = column_scale
 
     def __str__(self):
-        return str(self.id) + ","+str(self.column_name)+","+str(self.column_type)+","+str(self.default_value)+","+str(self.is_pk)+","+ self.is_nullable+","+self.length+","+self.precision+","+self.scale
+        return str(self.id) + "," + str(self.column_name) +"," + str(self.column_type) +"," + str(self.default_value) +"," + str(self.key_type) + "," + self.is_nullable + "," + self.column_length + "," + self.column_precision + "," + self.column_scale
 
 
 

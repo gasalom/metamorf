@@ -35,7 +35,7 @@ class EngineRestore(Engine):
         metadata_tables = [TABLE_OM_DATASET, TABLE_OM_DATASET_EXECUTION, TABLE_OM_DATASET_T_ORDER,
                            TABLE_OM_DATASET_T_AGG, TABLE_OM_DATASET_T_DISTINCT, TABLE_OM_DATASET_SPECIFICATION,
                            TABLE_OM_DATASET_RELATIONSHIPS, TABLE_OM_DATASET_T_MAPPING, TABLE_OM_DATASET_T_FILTER,
-                           TABLE_OM_DATASET_T_HAVING, TABLE_OM_DATASET_PATH , TABLE_OM_PROPERTIES]
+                           TABLE_OM_DATASET_T_HAVING, TABLE_OM_DATASET_PATH , TABLE_OM_PROPERTIES, TABLE_OM_DATASET_DV]
         for file in metadata_tables:
             self.log.log(self.engine_name, "Deleting: " + file, LOG_LEVEL_INFO)
             query = Query()
@@ -77,6 +77,23 @@ class EngineRestore(Engine):
         query_values.set_insert_columns(COLUMNS_OM_DATASET)
         query_values.set_values(metadata.om_dataset)
         self.log.log(self.engine_name, "Loading: " + TABLE_OM_DATASET, LOG_LEVEL_INFO)
+        res = self.connection.execute(str(query_values))
+        result = result and res
+
+        # TABLE_OM_DATASET_DV
+        file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
+        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET_DV + "." + FILE_TYPE_CSV)
+        file = file_reader.read_file()
+        res = metadata.add_om_dataset_dv(self.refactor_file(file))
+        result = result and res
+        query_values = Query()
+        query_values.set_database(connection_type)
+        query_values.set_has_header(True)
+        query_values.set_type(QUERY_TYPE_VALUES)
+        query_values.set_target_table(TABLE_OM_DATASET_DV)
+        query_values.set_insert_columns(COLUMNS_OM_DATASET_DV)
+        query_values.set_values(metadata.om_dataset_dv)
+        self.log.log(self.engine_name, "Loading: " + TABLE_OM_DATASET_DV, LOG_LEVEL_INFO)
         res = self.connection.execute(str(query_values))
         result = result and res
 

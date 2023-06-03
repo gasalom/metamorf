@@ -111,7 +111,14 @@ class ConfigValidator:
         if 'name' not in self.configuration_file:
             self.log.log(self.configvalidator_name, "ConfigurationFile - Missing Value: name", LOG_LEVEL_ERROR)
             return False
+        if self.configuration_file['name'] is None:
+            self.log.log(self.configvalidator_name, "ConfigurationFile - Missing Value: name", LOG_LEVEL_ERROR)
+            return False
+
         if 'owner' not in self.configuration_file:
+            self.log.log(self.configvalidator_name, "ConfigurationFile - Missing Value: owner", LOG_LEVEL_CRITICAL)
+            return False
+        if self.configuration_file['owner'] is None:
             self.log.log(self.configvalidator_name, "ConfigurationFile - Missing Value: owner", LOG_LEVEL_CRITICAL)
             return False
 
@@ -125,7 +132,10 @@ class ConfigValidator:
             return False
 
         if self.configuration_file['output']['type'] not in self.get_type_options_for_output():
-            self.log.log(self.configvalidator_name, 'ConfigurationFile - Output: The attribute [type] has an impossible value', LOG_LEVEL_CRITICAL)
+            self.log.log(self.configvalidator_name, 'ConfigurationFile - Output: The attribute [output][type] has an impossible value', LOG_LEVEL_CRITICAL)
+            return False
+        if self.configuration_file['output']['type'] is None:
+            self.log.log(self.configvalidator_name, "ConfigurationFile - Output: The attribute [output][type] needs to be indicated", LOG_LEVEL_CRITICAL)
             return False
 
         # Validation MODULES
@@ -164,6 +174,9 @@ class ConfigValidator:
         if 'connection_type' not in metadata_information:
             self.log.log(self.configvalidator_name, 'ConfigurationFile - Metadata: The attribute [connection_type] needs to be indicated', LOG_LEVEL_ERROR)
             return False
+        if metadata_information['connection_type'] is None:
+            self.log.log(self.configvalidator_name, "[ERROR] ConfigurationFile - Metadata: The attribute [connection_type] needs to be indicated", LOG_LEVEL_CRITICAL)
+            return False
         mandatory_fields = self.get_mandatory_fields_from_database(metadata_information['connection_type'])
             #First validation: All the fields are OK
         for key,value in metadata_information.items():
@@ -174,6 +187,9 @@ class ConfigValidator:
             #Second validation: There are all the fields indicated
         for key,value in metadata_information.items():
             if key=='connection_type': continue
+            if value == None:
+                self.log.log(self.configvalidator_name, 'ConfigurationFile - Metadata: Field ' + key + ' has not a value', LOG_LEVEL_ERROR)
+                return False
             mandatory_fields.remove(key)
         if len(mandatory_fields)>0:
             self.log.log(self.configvalidator_name, 'ConfigurationFile - Metadata: The following attributes needs to be indicated to permit the connection: ' + str(mandatory_fields), LOG_LEVEL_ERROR)
@@ -186,8 +202,12 @@ class ConfigValidator:
 
         data_information = self.configuration_file['data']
         if 'connection_type' not in data_information:
-            self.log.log(self.configvalidator_name, '[ERROR] ConfigurationFile - Metadata: The attribute [connection_type] needs to be indicated', LOG_LEVEL_ERROR)
+            self.log.log(self.configvalidator_name, '[ERROR] ConfigurationFile - Data: The attribute [connection_type] needs to be indicated', LOG_LEVEL_ERROR)
             return False
+        if data_information['connection_type'] is None:
+            self.log.log(self.configvalidator_name, "[ERROR] ConfigurationFile - Data: The attribute [connection_type] needs to be indicated", LOG_LEVEL_CRITICAL)
+            return False
+
         mandatory_fields = self.get_mandatory_fields_from_database(data_information['connection_type'])
         # First validation: All the fields are OK
         for key, value in data_information.items():

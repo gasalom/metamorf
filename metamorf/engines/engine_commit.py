@@ -98,6 +98,38 @@ class EngineCommit(Engine):
         query.set_where_filters(where_filter)
         self.connection.execute(str(query))
 
+        # GIT_ENTRY_DV_ENTITY
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_GIT_ENTRY_DV_ENTITY)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_MAPPINGS
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_GIT_ENTRY_DV_MAPPINGS)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_PROPERTIES
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_GIT_ENTRY_DV_PROPERTIES)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_PROPERTIES
+        query = Query()
+        query.set_database(connection_type)
+        query.set_type(QUERY_TYPE_DELETE)
+        query.set_target_table(TABLE_GIT_ENTRY_FILES)
+        query.set_where_filters(where_filter)
+        self.connection.execute(str(query))
+
         self.log.log(self.engine_name, "Finished to delete previous metadata version", LOG_LEVEL_INFO)
 
     def copy_metadata_git(self):
@@ -191,6 +223,50 @@ class EngineCommit(Engine):
         query.set_insert_columns(COLUMNS_GIT_ENTRY_AGGREGATORS)
         query.set_select_columns(COLUMNS_ENTRY_AGGREGATORS)
         query.set_from_tables([TABLE_ENTRY_AGGREGATORS])
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_ENTITY
+        query = Query()
+        query.set_type(QUERY_TYPE_INSERT)
+        query.set_database(connection_type)
+        query.set_where_filters(where_filter)
+        query.set_target_table(TABLE_GIT_ENTRY_DV_ENTITY)
+        query.set_insert_columns(COLUMNS_GIT_ENTRY_DV_ENTITY)
+        query.set_select_columns(COLUMNS_ENTRY_DV_ENTITY)
+        query.set_from_tables([TABLE_ENTRY_DV_ENTITY])
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_MAPPINGS
+        query = Query()
+        query.set_type(QUERY_TYPE_INSERT)
+        query.set_database(connection_type)
+        query.set_where_filters(where_filter)
+        query.set_target_table(TABLE_GIT_ENTRY_DV_MAPPINGS)
+        query.set_insert_columns(COLUMNS_GIT_ENTRY_DV_MAPPINGS)
+        query.set_select_columns(COLUMNS_ENTRY_DV_MAPPINGS)
+        query.set_from_tables([TABLE_ENTRY_DV_MAPPINGS])
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_PROPERTIES
+        query = Query()
+        query.set_type(QUERY_TYPE_INSERT)
+        query.set_database(connection_type)
+        query.set_where_filters(where_filter)
+        query.set_target_table(TABLE_GIT_ENTRY_DV_PROPERTIES)
+        query.set_insert_columns(COLUMNS_GIT_ENTRY_DV_PROPERTIES)
+        query.set_select_columns(COLUMNS_ENTRY_DV_PROPERTIES)
+        query.set_from_tables([TABLE_ENTRY_DV_PROPERTIES])
+        self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_PROPERTIES
+        query = Query()
+        query.set_type(QUERY_TYPE_INSERT)
+        query.set_database(connection_type)
+        query.set_where_filters(where_filter)
+        query.set_target_table(TABLE_GIT_ENTRY_FILES)
+        query.set_insert_columns(COLUMNS_GIT_ENTRY_FILES)
+        query.set_select_columns(COLUMNS_ENTRY_FILES)
+        query.set_from_tables([TABLE_ENTRY_FILES])
         self.connection.execute(str(query))
 
 

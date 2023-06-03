@@ -1,0 +1,3 @@
+metadata:
+  connection_type: 'SQLite'
+  sqlite_path: 'metamorf_example.db'
