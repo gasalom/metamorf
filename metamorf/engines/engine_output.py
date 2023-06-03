@@ -4,6 +4,7 @@ from metamorf.tools.connection import ConnectionFactory
 from metamorf.constants import *
 from metamorf.tools.utils import get_list_nodes_from_metadata, get_node_with_with_query_execution_settings
 import re
+import os
 
 class EngineOutput(Engine):
 
@@ -58,7 +59,7 @@ class EngineOutput(Engine):
 
 
             file_controller = FileControllerFactory().get_file_reader(FILE_TYPE_SQL)
-            file_controller.set_file_location(ACTUAL_PATH + '\\' + OUTPUT_FILES_PATH, node.name)
+            file_controller.set_file_location(os.path.join(ACTUAL_PATH, OUTPUT_FILES_PATH), node.name)
             file_controller.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller.write_file(content)
 
@@ -129,7 +130,7 @@ class EngineOutput(Engine):
             yml_content['sources'].append(yml_name)
 
         file_controller = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller.set_file_location(ACTUAL_PATH + '\\' + OUTPUT_FILES_PATH, "sources_metamorf")
+        file_controller.set_file_location(os.path.join(ACTUAL_PATH, OUTPUT_FILES_PATH), "sources_metamorf")
         file_controller.setup_writer(FILE_WRITER_NEW_FILE)
         file_controller.write_file(yml_content)
 

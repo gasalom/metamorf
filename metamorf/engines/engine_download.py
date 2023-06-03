@@ -2,6 +2,7 @@ from metamorf.engines.engine import Engine
 from metamorf.tools.filecontroller import FileControllerFactory
 from metamorf.tools.connection import ConnectionFactory
 from metamorf.constants import *
+import os
 
 class EngineDownload(Engine):
 
@@ -70,7 +71,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_entity:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_ENTITY)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_ENTITY)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_ENTITY + "]", LOG_LEVEL_INFO)
@@ -83,7 +84,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_dataset_mappings:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_DATASET_MAPPINGS)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_DATASET_MAPPINGS)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_DATASET_MAPPINGS + "]", LOG_LEVEL_INFO)
 
@@ -97,8 +98,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_dataset_relationship:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_DATASET_RELATIONSHIPS)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_DATASET_RELATIONSHIPS)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_DATASET_RELATIONSHIPS + "]", LOG_LEVEL_INFO)
@@ -111,8 +111,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_order:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_ORDER)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_ORDER)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_ORDER + "]", LOG_LEVEL_INFO)
@@ -125,8 +124,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_aggregators:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_AGGREGATORS)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_AGGREGATORS)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_AGGREGATORS + "]", LOG_LEVEL_INFO)
@@ -139,8 +137,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_path:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_PATH)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_PATH)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_PATH + "]", LOG_LEVEL_INFO)
@@ -153,8 +150,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_filters:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_FILTERS)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_FILTERS)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_FILTERS + "]", LOG_LEVEL_INFO)
@@ -167,8 +163,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_having:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_HAVING)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_HAVING)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_HAVING + "]", LOG_LEVEL_INFO)
@@ -181,8 +176,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_dv_entity:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_DV_ENTITY)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_DV_ENTITY)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_DV_ENTITY + "]", LOG_LEVEL_INFO)
@@ -195,8 +189,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_dv_mappings:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_DV_MAPPINGS)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_DV_MAPPINGS)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_DV_MAPPINGS + "]", LOG_LEVEL_INFO)
@@ -209,8 +202,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_dv_properties:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_DV_PROPERTIES)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_DV_PROPERTIES)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_DV_PROPERTIES + "]", LOG_LEVEL_INFO)
@@ -223,8 +215,7 @@ class EngineDownload(Engine):
             for registry in self.metadata_actual.entry_files:
                 content.append(registry.get()[:-1])
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
-                                                    FILE_ENTRY_FILES)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_FILES)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(content)
             self.log.log(self.engine_name, "Finish download for [" + FILE_ENTRY_FILES + "]", LOG_LEVEL_INFO)

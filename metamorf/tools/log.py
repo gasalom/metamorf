@@ -12,7 +12,7 @@ class Log:
         self.file_log.setup_writer(FILE_WRITER_APPEND)
 
         file_controller_properties = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_properties.set_file_location(PACKAGE_PATH + "\\" + PROPERTIES_FILE_PATH, PROPERTIES_FILE_NAME)
+        file_controller_properties.set_file_location(os.path.join(PACKAGE_PATH, PROPERTIES_FILE_PATH), PROPERTIES_FILE_NAME)
         self.properties_file = file_controller_properties.read_file()
 
     def log(self, subject: str, message: str, level: int):

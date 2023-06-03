@@ -3,6 +3,7 @@ import yaml
 from metamorf.constants import *
 import csv
 import json
+import os
 
 
 class FileController(ABC):
@@ -11,8 +12,8 @@ class FileController(ABC):
         pass
 
     def set_file_location(self, path: str, file_name: str):
-        self.path = path
-        self.file_name = file_name
+        self.path = str(path)
+        self.file_name = str(file_name.lower())
 
     @abstractmethod
     def read_file(self):
@@ -42,7 +43,7 @@ class FileControllerYML(FileController):
 
     def read_file(self):
         if len(self.file_name) == 0 or self.file_name is None: raise ValueError("FileController_YML: Trying to read a file with null name")
-        final_path = self.path + "\\" + self.file_name
+        final_path = os.path.join(self.path, self.file_name)
         if final_path[-4:] != "." + self.extension:
             final_path += "." + self.extension
         try:
@@ -64,7 +65,7 @@ class FileControllerJSON(FileController):
 
     def read_file(self):
         if len(self.file_name) == 0 or self.file_name is None: raise ValueError("FileController_JSON: Trying to read a file with null name")
-        final_path = self.path + "\\" + self.file_name
+        final_path = os.path.join(self.path, self.file_name)
         if final_path[-4:] != "." + self.extension:
             final_path += "." + self.extension
         try:
@@ -85,8 +86,8 @@ class FileControllerSQL(FileController):
 
     def read_file(self):
         if len(self.file_name)==0 or self.file_name==None: raise ValueError("FileController_SQL: Trying to read a file with None null")
-        final_path = self.path + '\\' + self.file_name
-        if final_path[-4:] != "." + self.extension:
+        final_path = os.path.join(self.path, self.file_name)
+        if str(final_path[-4:]) != "." + self.extension:
             final_path += "." + self.extension
         try:
             with open(final_path, encoding='utf-8') as file:
@@ -104,7 +105,7 @@ class FileControllerLOG(FileController):
 
     def read_file(self):
         if len(self.file_name)==0 or self.file_name==None: raise ValueError("FileController_SQL: Trying to read a file with None null")
-        final_path = self.path + '\\' + self.file_name
+        final_path = os.path.join(self.path, self.file_name)
         if final_path[-4:] != "." + self.extension:
             final_path += "." + self.extension
         try:
@@ -123,7 +124,7 @@ class FileControllerTXT(FileController):
 
     def read_file(self):
         if len(self.file_name) == 0 or self.file_name is None: raise ValueError("FileController_SQL: Trying to read a file with None null")
-        final_path = self.path + '\\' + self.file_name
+        final_path = os.path.join(self.path, self.file_name)
         if final_path[-4:] != "." + self.extension:
             final_path += "." + self.extension
         try:
@@ -147,7 +148,7 @@ class FileControllerCSV(FileController):
     def read_file(self):
         if len(self.file_name) == 0 or self.file_name is None: raise ValueError("FileController_SQL: Trying to read a file with None null")
         if self.path is None or self.path == '': final_path = self.file_name
-        else: final_path = self.path + '\\' + self.file_name
+        else: final_path = os.path.join(self.path, self.file_name)
         if final_path[-4:] != "." + self.extension:
             final_path += "." + self.extension
         try:

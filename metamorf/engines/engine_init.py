@@ -46,39 +46,39 @@ class EngineInit(Engine):
 
         # Read Template OUTPUT & MODULES
         file_controller_configuration_template = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH, CONFIGURATION_FILE_NAME)
+        file_controller_configuration_template.set_file_location(os.path.join(PACKAGE_PATH, CONFIGURATION_FILE_PATH), CONFIGURATION_FILE_NAME)
         self.configuration_file = file_controller_configuration_template.read_file()
         file_controller_configuration.write_file(self.configuration_file)
 
         # Read Template DATA
         file_controller_configuration_template = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH + '\\' + self.data_database.lower(), CONFIGURATION_FILE_DATA + self.data_database + "." + FILE_TYPE_YML)
+        file_controller_configuration_template.set_file_location(os.path.join(PACKAGE_PATH, CONFIGURATION_FILE_PATH, self.data_database.lower()), CONFIGURATION_FILE_DATA + self.data_database + "." + FILE_TYPE_YML)
         self.configuration_file = file_controller_configuration_template.read_file()
         file_controller_configuration.write_file(self.configuration_file)
 
         # Read Template METADATA
         file_controller_configuration_template = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH + '\\' + self.metadata_database.lower(), CONFIGURATION_FILE_METADATA + self.metadata_database + "." + FILE_TYPE_YML)
+        file_controller_configuration_template.set_file_location(os.path.join(PACKAGE_PATH, CONFIGURATION_FILE_PATH, self.metadata_database.lower()), CONFIGURATION_FILE_METADATA + self.metadata_database + "." + FILE_TYPE_YML)
         self.configuration_file = file_controller_configuration_template.read_file()
         file_controller_configuration.write_file(self.configuration_file)
 
         # Create folder
-        if not os.path.exists(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH):
-            os.mkdir(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH)
-        if not os.path.exists(ACTUAL_PATH + '\\'+OUTPUT_FILES_PATH +'\\'):
-            os.mkdir(ACTUAL_PATH + '\\'+OUTPUT_FILES_PATH +'\\')
-        if not os.path.exists(ACTUAL_PATH + '\\'+BACKUP_FILES_PATH +'\\'):
-            os.mkdir(ACTUAL_PATH + '\\'+BACKUP_FILES_PATH +'\\')
+        if not os.path.exists(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH)):
+            os.mkdir(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH))
+        if not os.path.exists(os.path.join(ACTUAL_PATH, OUTPUT_FILES_PATH)):
+            os.mkdir(os.path.join(ACTUAL_PATH, OUTPUT_FILES_PATH))
+        if not os.path.exists(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH)):
+            os.mkdir(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH))
 
         # Create files - Metadata Entry
-        all_entry_files = os.listdir(PACKAGE_PATH + '\\' + ENTRY_FILES_PATH)
+        all_entry_files = os.listdir(os.path.join(PACKAGE_PATH, ENTRY_FILES_PATH))
         for file in all_entry_files:
             file_controller = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller.set_file_location(PACKAGE_PATH + '\\' + ENTRY_FILES_PATH, file)
+            file_controller.set_file_location(os.path.join(PACKAGE_PATH, ENTRY_FILES_PATH), file)
             file_to_write = file_controller.read_file()
 
             file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_controller_final.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, file)
+            file_controller_final.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), file)
             file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
             file_controller_final.write_file(file_to_write)
 
