@@ -20,15 +20,7 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["metamorf", "metamorf.engines", "metamorf.tools", "metamorf.entry",
-    "metamorf.configuration", "metamorf.configuration.mysql" , "metamorf.configuration.snowflake", "metamorf.configuration.sqlite",
-    "metamorf.initialization.sqlite",  "metamorf.initialization.snowflake", "metamorf.initialization.mysql"]
-
-[tool.setuptools.package-data]
-"metamorf.configuration" = ["*.yml"]
-"metamorf.initialization" = ["*.sql"]
-"metamorf.entry" = ["*.csv"]
-"metamorf.example" = ["*.csv", "*.sql"]
+packages = ["metamorf", "metamorf.engines", "metamorf.tools"]
 
 [project.urls]
 "Homepage" = "https://github.com/gasalom/metamorf"
