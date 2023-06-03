@@ -277,12 +277,12 @@ class ConnectionPostgreSQL(Connection):
 
     def get_connection(self, configuration: dict):
         self.log.log(self.engine_name, "Trying to connect to the PostgreSQL database", LOG_LEVEL_ONLY_LOG)
-
         self.conn = psycopg2.connect(
             user = configuration['postgres_user'],
             password = configuration['postgres_password'],
             host = configuration['postgres_host'],
-            database = configuration['postgres_database']
+            database = configuration['postgres_database'],
+            options= '-c search_path='+configuration['postgres_schema']
         )
         self.log.log(self.engine_name, "Finished to connect to the PostgreSQL database", LOG_LEVEL_ONLY_LOG)
 

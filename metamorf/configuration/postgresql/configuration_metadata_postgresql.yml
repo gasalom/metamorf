@@ -4,3 +4,4 @@ metadata:
   postgres_password: ''
   postgres_host: ''
   postgres_database: 'metamorf'
+  postgres_schema: 'metamorf'

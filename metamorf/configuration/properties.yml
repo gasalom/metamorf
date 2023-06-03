@@ -1,6 +1,6 @@
 name: "Metamorf"
-description: "Metadata Suite to control all your Datawarehouse metadata-driven"
-version: "0.4"
+description: "Metadata Suite to build and manage your Datawarehouse metadata-driven"
+version: "0.4.1"
 author: "Guillermo Aumatell Salom"
 contact: "guillermoaumatell@gmail.com"
 
@@ -109,7 +109,7 @@ database:
   - name: 'MySQL'
     mandatory_fields: ['mysql_user', 'mysql_password', 'mysql_host', 'mysql_database']
   - name: 'PostgreSQL'
-    mandatory_fields: ['postgres_user','postgres_password','postgres_host','postgres_database']
+    mandatory_fields: ['postgres_user','postgres_password','postgres_host','postgres_database', 'postgres_schema']
 
 output:
   type: ['dbt', 'sql']
