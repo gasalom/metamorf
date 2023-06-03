@@ -4,6 +4,7 @@ from metamorf.tools.connection import ConnectionFactory
 from metamorf.constants import *
 from metamorf.tools.metadata import Metadata
 from metamorf.tools.query import Query
+import os
 
 class EngineUpload(Engine):
 
@@ -95,7 +96,7 @@ class EngineUpload(Engine):
         # ENTRY_AGGREGATORS
         if FILE_ENTRY_AGGREGATORS in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_AGGREGATORS + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
 
@@ -116,7 +117,7 @@ class EngineUpload(Engine):
         # ENTRY_DATASET_MAPPINGS
         if FILE_ENTRY_DATASET_MAPPINGS in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_DATASET_MAPPINGS + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
@@ -136,7 +137,7 @@ class EngineUpload(Engine):
         # ENTRY_DATASET_RELATIONSHIPS
         if FILE_ENTRY_DATASET_RELATIONSHIPS in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_DATASET_RELATIONSHIPS + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
@@ -156,7 +157,7 @@ class EngineUpload(Engine):
         # ENTRY_ENTITY
         if FILE_ENTRY_ENTITY in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_ENTITY + "." + FILE_TYPE_CSV)
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_ENTITY + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
             res = metadata.add_entry_entity(all_rows)
@@ -175,7 +176,7 @@ class EngineUpload(Engine):
         # ENTRY_FILTERS
         if FILE_ENTRY_FILTERS in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_FILTERS + "." + FILE_TYPE_CSV)
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_FILTERS + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
             res = metadata.add_entry_filters(all_rows)
@@ -194,7 +195,7 @@ class EngineUpload(Engine):
         # ENTRY_HAVING
         if FILE_ENTRY_HAVING in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_HAVING + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
@@ -214,7 +215,7 @@ class EngineUpload(Engine):
         # ENTRY_ORDER
         if FILE_ENTRY_ORDER in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_ORDER + "." + FILE_TYPE_CSV)
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_ORDER + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
             res = metadata.add_entry_order(all_rows)
@@ -233,7 +234,7 @@ class EngineUpload(Engine):
         # ENTRY_PATH
         if FILE_ENTRY_PATH in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_PATH + "." + FILE_TYPE_CSV)
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_PATH + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
             res = metadata.add_entry_path(all_rows)
@@ -252,7 +253,7 @@ class EngineUpload(Engine):
         # ENTRY_DV_ENTITY
         if FILE_ENTRY_DV_ENTITY in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_DV_ENTITY + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
@@ -272,7 +273,7 @@ class EngineUpload(Engine):
         # ENTRY_DV_MAPPINGS
         if FILE_ENTRY_DV_MAPPINGS in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH, FILE_ENTRY_DV_MAPPINGS + "." + FILE_TYPE_CSV)
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH), FILE_ENTRY_DV_MAPPINGS + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
             res = metadata.add_entry_dv_mappings(all_rows)
@@ -291,7 +292,7 @@ class EngineUpload(Engine):
         # ENTRY_DV_PROPERTIES
         if FILE_ENTRY_DV_PROPERTIES in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_DV_PROPERTIES + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)
@@ -311,7 +312,7 @@ class EngineUpload(Engine):
         # ENTRY_FILES
         if FILE_ENTRY_FILES in self.entry_files_to_load:
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-            file_reader.set_file_location(ACTUAL_PATH + '\\' + ENTRY_FILES_PATH,
+            file_reader.set_file_location(os.path.join(ACTUAL_PATH, ENTRY_FILES_PATH),
                                           FILE_ENTRY_FILES + "." + FILE_TYPE_CSV)
             file = file_reader.read_file()
             all_rows = self.add_owner_at_end_each_row(file)

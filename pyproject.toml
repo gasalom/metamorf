@@ -1,6 +1,6 @@
 [project]
 name = "Metamorf"
-version = "0.4.1"
+version = "0.4.3"
 authors = [
   { name="Guillermo Aumatell", email="gaumatellsalom@gmail.com" },
 ]
@@ -16,7 +16,9 @@ dependencies = [
     "snowflake-connector-python",
     "PyYAML",
     "Flask",
-    "psycopg2"
+    "psycopg2",
+    "mysql-connector-python",
+    "fdb"
 ]
 
 [tool.setuptools]

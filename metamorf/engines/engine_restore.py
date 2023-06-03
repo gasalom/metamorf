@@ -4,6 +4,7 @@ from metamorf.tools.connection import ConnectionFactory
 from metamorf.constants import *
 from metamorf.tools.metadata import Metadata
 from metamorf.tools.query import Query
+import os
 
 class EngineRestore(Engine):
 
@@ -65,7 +66,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET + "." + FILE_TYPE_CSV)
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH), TABLE_OM_DATASET + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset(self.refactor_file(file))
         result = result and res
@@ -82,7 +83,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_DV
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET_DV + "." + FILE_TYPE_CSV)
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH), TABLE_OM_DATASET_DV + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_dv(self.refactor_file(file))
         result = result and res
@@ -99,7 +100,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_EXECUTION
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET_EXECUTION + "." + FILE_TYPE_CSV)
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH), TABLE_OM_DATASET_EXECUTION + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_execution(self.refactor_file(file))
         result = result and res
@@ -116,7 +117,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_T_ORDER
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET_T_ORDER + "." + FILE_TYPE_CSV)
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH), TABLE_OM_DATASET_T_ORDER + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_t_order(self.refactor_file(file))
         result = result and res
@@ -133,7 +134,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_T_AGG
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET_T_AGG + "." + FILE_TYPE_CSV)
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH), TABLE_OM_DATASET_T_AGG + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_t_agg(self.refactor_file(file))
         result = result and res
@@ -150,7 +151,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_T_DISTINCT
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_T_DISTINCT + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_t_distinct(self.refactor_file(file))
@@ -168,7 +169,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_SPECIFICATION
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_SPECIFICATION + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_specification(self.refactor_file(file))
@@ -186,7 +187,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_RELATIONSHIPS
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_RELATIONSHIPS + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_relationships(self.refactor_file(file))
@@ -204,7 +205,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_T_MAPPING
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_T_MAPPING + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_t_mapping(self.refactor_file(file))
@@ -222,7 +223,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_T_FILTER
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_T_FILTER + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_t_filter(self.refactor_file(file))
@@ -240,7 +241,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_T_HAVING
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_T_HAVING + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_t_having(self.refactor_file(file))
@@ -258,7 +259,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_DATASET_PATH
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_DATASET_PATH + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_dataset_path(self.refactor_file(file))
@@ -276,7 +277,7 @@ class EngineRestore(Engine):
 
         # TABLE_OM_PROPERTIES
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
-        file_reader.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH,
+        file_reader.set_file_location(os.path.join(ACTUAL_PATH, BACKUP_FILES_PATH),
                                       TABLE_OM_PROPERTIES + "." + FILE_TYPE_CSV)
         file = file_reader.read_file()
         res = metadata.add_om_properties(self.refactor_file_last_col(file))

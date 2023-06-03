@@ -1,12 +1,13 @@
 from metamorf.tools.filecontroller import FileControllerFactory
 from metamorf.constants import *
+import os
 
 class ArgParser:
 
     def __init__(self, arguments: list):
         self.arguments = arguments
         file_controller_properties = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_properties.set_file_location(PACKAGE_PATH + '\\' + PROPERTIES_FILE_PATH, PROPERTIES_FILE_NAME)
+        file_controller_properties.set_file_location(os.path.join(PACKAGE_PATH, PROPERTIES_FILE_PATH), PROPERTIES_FILE_NAME)
         self.properties_file = file_controller_properties.read_file()
         self.all_commands = self.get_all_commands()
 
