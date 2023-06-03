@@ -19,7 +19,7 @@ class EngineDeployExample(Engine):
         connection_type_data = self.configuration_file['data']['connection_type']
         # Get File that will be executed
         file_controller_init_sql = FileControllerFactory().get_file_reader(FILE_TYPE_SQL)
-        file_controller_init_sql.set_file_location(PACKAGE_PATH + "\\" + INITIALIZATION_FILE_PATH, "init_example_metadata_" + connection_type_data + ".sql")
+        file_controller_init_sql.set_file_location(PACKAGE_PATH + "\\" + INITIALIZATION_FILE_PATH + "\\"+ connection_type.lower(), "init_example_metadata_" + connection_type_data + ".sql")
         file_init_sql = file_controller_init_sql.read_file()
 
         # Get Connection and Execute the Deployment
@@ -38,7 +38,7 @@ class EngineDeployExample(Engine):
         connection_type = self.configuration_file['data']['connection_type']
         # Get File that will be executed
         file_controller_init_sql = FileControllerFactory().get_file_reader(FILE_TYPE_SQL)
-        file_controller_init_sql.set_file_location(PACKAGE_PATH + "\\" + INITIALIZATION_FILE_PATH, "init_example_data_" + connection_type + ".sql")
+        file_controller_init_sql.set_file_location(PACKAGE_PATH + "\\" + INITIALIZATION_FILE_PATH + "\\"+ connection_type.lower(), "init_example_data_" + connection_type + ".sql")
         file_init_sql = file_controller_init_sql.read_file()
 
         # Get Connection and Execute the Deployment

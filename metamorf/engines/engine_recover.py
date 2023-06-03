@@ -12,12 +12,16 @@ class EngineRecover(Engine):
 
         self.tables_to_load = [TABLE_ENTRY_AGGREGATORS, TABLE_ENTRY_DATASET_MAPPINGS,
                                TABLE_ENTRY_DATASET_RELATIONSHIPS, TABLE_ENTRY_ENTITY, TABLE_ENTRY_FILTERS,
-                               TABLE_ENTRY_ORDER, TABLE_ENTRY_PATH, TABLE_ENTRY_HAVING, TABLE_ENTRY_AGGREGATORS]
+                               TABLE_ENTRY_ORDER, TABLE_ENTRY_PATH, TABLE_ENTRY_HAVING,
+                               TABLE_ENTRY_DV_ENTITY, TABLE_ENTRY_DV_MAPPINGS, TABLE_ENTRY_DV_PROPERTIES,
+                               TABLE_ENTRY_FILES]
         if 'select' in self.arguments:
             if self.arguments['select'] == "all" or self.arguments['select'] == "*":
                 self.tables_to_load = [TABLE_ENTRY_AGGREGATORS, TABLE_ENTRY_DATASET_MAPPINGS,
                                        TABLE_ENTRY_DATASET_RELATIONSHIPS, TABLE_ENTRY_ENTITY, TABLE_ENTRY_FILTERS,
-                                       TABLE_ENTRY_ORDER, TABLE_ENTRY_PATH, TABLE_ENTRY_HAVING, TABLE_ENTRY_AGGREGATORS]
+                                       TABLE_ENTRY_ORDER, TABLE_ENTRY_PATH, TABLE_ENTRY_HAVING,
+                                       TABLE_ENTRY_DV_ENTITY, TABLE_ENTRY_DV_MAPPINGS, TABLE_ENTRY_DV_PROPERTIES,
+                                       TABLE_ENTRY_FILES]
             if self.arguments['select'].lower() == TABLE_ENTRY_DATASET_MAPPINGS.lower():
                 self.tables_to_load = [TABLE_ENTRY_DATASET_MAPPINGS]
             if self.arguments['select'].lower() == TABLE_ENTRY_DATASET_RELATIONSHIPS.lower():
@@ -34,6 +38,14 @@ class EngineRecover(Engine):
                 self.tables_to_load = [TABLE_ENTRY_HAVING]
             if self.arguments['select'].lower() == TABLE_ENTRY_AGGREGATORS.lower():
                 self.tables_to_load = [TABLE_ENTRY_AGGREGATORS]
+            if self.arguments['select'].lower() == TABLE_ENTRY_DV_ENTITY.lower():
+                self.tables_to_load = [TABLE_ENTRY_DV_ENTITY]
+            if self.arguments['select'].lower() == TABLE_ENTRY_DV_MAPPINGS.lower():
+                self.tables_to_load = [TABLE_ENTRY_DV_MAPPINGS]
+            if self.arguments['select'].lower() == TABLE_ENTRY_DV_PROPERTIES.lower():
+                self.tables_to_load = [TABLE_ENTRY_DV_PROPERTIES]
+            if self.arguments['select'].lower() == TABLE_ENTRY_FILES.lower():
+                self.tables_to_load = [TABLE_ENTRY_FILES]
 
     def run(self):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
@@ -128,6 +140,42 @@ class EngineRecover(Engine):
             query.set_database(connection_type)
             query.set_type(QUERY_TYPE_DELETE)
             query.set_target_table(TABLE_ENTRY_AGGREGATORS)
+            query.set_where_filters(where_filter)
+            self.connection.execute(str(query))
+
+        # ENTRY_DV_ENTITY
+        if TABLE_ENTRY_DV_ENTITY in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_DELETE)
+            query.set_target_table(TABLE_ENTRY_DV_ENTITY)
+            query.set_where_filters(where_filter)
+            self.connection.execute(str(query))
+
+        # ENTRY_DV_MAPPINGS
+        if TABLE_ENTRY_DV_MAPPINGS in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_DELETE)
+            query.set_target_table(TABLE_ENTRY_DV_MAPPINGS)
+            query.set_where_filters(where_filter)
+            self.connection.execute(str(query))
+
+        # ENTRY_DV_PROPERTIES
+        if TABLE_ENTRY_DV_PROPERTIES in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_DELETE)
+            query.set_target_table(TABLE_ENTRY_DV_PROPERTIES)
+            query.set_where_filters(where_filter)
+            self.connection.execute(str(query))
+
+        # ENTRY_FILES
+        if TABLE_ENTRY_FILES in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_DELETE)
+            query.set_target_table(TABLE_ENTRY_FILES)
             query.set_where_filters(where_filter)
             self.connection.execute(str(query))
 
@@ -232,6 +280,54 @@ class EngineRecover(Engine):
             query.set_insert_columns(COLUMNS_ENTRY_AGGREGATORS)
             query.set_select_columns(COLUMNS_GIT_ENTRY_AGGREGATORS)
             query.set_from_tables([TABLE_GIT_ENTRY_AGGREGATORS])
+            self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_ENTITY
+        if TABLE_ENTRY_DV_ENTITY in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_INSERT)
+            query.set_where_filters(where_filter)
+            query.set_target_table(TABLE_ENTRY_DV_ENTITY)
+            query.set_insert_columns(COLUMNS_ENTRY_DV_ENTITY)
+            query.set_select_columns(COLUMNS_GIT_ENTRY_DV_ENTITY)
+            query.set_from_tables([TABLE_GIT_ENTRY_DV_ENTITY])
+            self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_MAPPINGS
+        if TABLE_ENTRY_DV_MAPPINGS in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_INSERT)
+            query.set_where_filters(where_filter)
+            query.set_target_table(TABLE_ENTRY_DV_MAPPINGS)
+            query.set_insert_columns(COLUMNS_ENTRY_DV_MAPPINGS)
+            query.set_select_columns(COLUMNS_GIT_ENTRY_DV_MAPPINGS)
+            query.set_from_tables([TABLE_GIT_ENTRY_DV_MAPPINGS])
+            self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_PROPERTIES
+        if TABLE_ENTRY_DV_PROPERTIES in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_INSERT)
+            query.set_where_filters(where_filter)
+            query.set_target_table(TABLE_ENTRY_DV_PROPERTIES)
+            query.set_insert_columns(COLUMNS_ENTRY_DV_PROPERTIES)
+            query.set_select_columns(COLUMNS_GIT_ENTRY_DV_PROPERTIES)
+            query.set_from_tables([TABLE_GIT_ENTRY_DV_PROPERTIES])
+            self.connection.execute(str(query))
+
+        # GIT_ENTRY_DV_PROPERTIES
+        if TABLE_ENTRY_FILES in self.tables_to_load:
+            query = Query()
+            query.set_database(connection_type)
+            query.set_type(QUERY_TYPE_INSERT)
+            query.set_where_filters(where_filter)
+            query.set_target_table(TABLE_ENTRY_FILES)
+            query.set_insert_columns(COLUMNS_ENTRY_FILES)
+            query.set_select_columns(COLUMNS_GIT_ENTRY_FILES)
+            query.set_from_tables([TABLE_GIT_ENTRY_FILES])
             self.connection.execute(str(query))
 
         self.log.log(self.engine_name, "Finished to load backup metadata", LOG_LEVEL_INFO)

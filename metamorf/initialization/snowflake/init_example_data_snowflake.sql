@@ -10,6 +10,22 @@ drop table if exists METAMORF.DATA.FLIGHTS;
 drop table if exists METAMORF.DATA.CUSTOMERS;
 drop table if exists METAMORF.DATA.USERS_WEB;
 drop table if exists METAMORF.DATA.FLIGHTS_TMP;
+drop table if exists METAMORF.DATA.HUB_CUSTOMER;
+drop table if exists METAMORF.DATA.HUB_FLIGHTS;
+drop table if exists METAMORF.DATA.SAT_CUSTOMER_INFO;
+drop table if exists METAMORF.DATA.SAT_FLIGHTS_ICAO;
+drop table if exists METAMORF.DATA.SAT_CUSTOMER_LEGAL;
+drop table if exists METAMORF.DATA.LINK_SELLS;
+drop table if exists METAMORF.DATA.SAT_FLIGHTS_ICAO;
+drop table if exists METAMORF.DATA.SAT_SELL_EVENT;
+drop table if exists METAMORF.DATA.SAT_SELL_PROPERTIES;
+drop table if exists METAMORF.DATA.SAT_LAST_APPEAR_DATE;
+drop table if exists METAMORF.DATA.HUB_AIRPORTS;
+drop table if exists METAMORF.DATA.LINK_AIRPORTS_FLIGHTS;
+drop table if exists METAMORF.DATA.RTS_AIRPORTS;
+drop table if exists METAMORF.DATA.RTS_CUSTOMER;
+drop table if exists METAMORF.DATA.RTS_SELLS;
+drop table if exists METAMORF.DATA.SATE_AIRPORTS_FLIGHTS;
 
 /******************** CREATION DATABASE **********************/
 CREATE TABLE METAMORF.DATA.AIRCRAFTS (

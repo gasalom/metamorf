@@ -1,0 +1,13 @@
+include metamorf/configuration/mysql/*.yml
+include metamorf/configuration/postgresql/*.yml
+include metamorf/configuration/snowflake/*.yml
+include metamorf/configuration/sqlite/*.yml
+include metamorf/configuration/*.yml
+
+include metamorf/entry/*.csv
+
+include metamorf/initialization/mysql/*.sql
+include metamorf/initialization/postgresql/*.sql
+include metamorf/initialization/snowflake/*.sql
+include metamorf/initialization/sqlite/*.sql
+include metamorf/initialization/*.sql

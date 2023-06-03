@@ -26,6 +26,16 @@ class EngineBackup(Engine):
         file_controller_final.write_file(content)
         file_controller_final.close()
 
+        # OM_DATASET_DV
+        content = []
+        content.append(COLUMNS_OM_DATASET_DV)
+        for registry in self.metadata_actual.om_dataset_dv: content.append(registry.get())
+        file_controller_final = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
+        file_controller_final.set_file_location(ACTUAL_PATH + '\\' + BACKUP_FILES_PATH, TABLE_OM_DATASET_DV)
+        file_controller_final.setup_writer(FILE_WRITER_NEW_FILE)
+        file_controller_final.write_file(content)
+        file_controller_final.close()
+
         # OM_DATASET_T_ORDER
         content = []
         content.append(COLUMNS_OM_DATASET_T_ORDER)

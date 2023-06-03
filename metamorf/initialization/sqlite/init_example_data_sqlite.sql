@@ -8,6 +8,23 @@ drop table if exists USERS_WEB;
 drop table if exists FLIGHTS_TMP;
 drop table if exists AIRCRAFTS_TMP;
 drop table if exists CUSTOMERS_TMP;
+drop table if exists HUB_CUSTOMER;
+drop table if exists HUB_FLIGHTS;
+drop table if exists SAT_CUSTOMER_INFO;
+drop table if exists SAT_FLIGHTS_ICAO;
+drop table if exists SAT_CUSTOMER_LEGAL;
+drop table if exists LINK_SELLS;
+drop table if exists SAT_FLIGHTS_ICAO;
+drop table if exists SAT_SELL_EVENT;
+drop table if exists SAT_SELL_PROPERTIES;
+drop table if exists STS_CUSTOMER;
+drop table if exists SAT_LAST_APPEAR_DATE;
+drop table if exists HUB_AIRPORTS;
+drop table if exists LINK_AIRPORTS_FLIGHTS;
+drop table if exists RTS_AIRPORTS;
+drop table if exists RTS_CUSTOMER;
+drop table if exists RTS_SELLS;
+drop table if exists SATE_AIRPORTS_FLIGHTS;
 
 /******************** CREATION DATABASE **********************/
 CREATE TABLE AIRCRAFTS (

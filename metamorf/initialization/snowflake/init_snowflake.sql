@@ -1,5 +1,4 @@
 /********************** RESET DATABASE ***********************/
-DROP TABLE IF EXISTS ENTRY_PATH;
 DROP TABLE IF EXISTS OM_DATASET_HARDCODED;
 DROP TABLE IF EXISTS OM_DATASET_PATH;
 DROP TABLE IF EXISTS OM_PROPERTIES;
@@ -12,7 +11,13 @@ DROP TABLE IF EXISTS OM_REF_ENTITY_TYPE;
 DROP TABLE IF EXISTS ENTRY_ENTITY;
 DROP TABLE IF EXISTS ENTRY_FILTERS;
 DROP TABLE IF EXISTS ENTRY_ORDER;
+DROP TABLE IF EXISTS ENTRY_HAVING;
+DROP TABLE IF EXISTS ENTRY_PATH;
+DROP TABLE IF EXISTS ENTRY_AGGREGATORS;
+DROP TABLE IF EXISTS ENTRY_DATASET_MAPPINGS;
+DROP TABLE IF EXISTS ENTRY_DATASET_RELATIONSHIPS;
 DROP TABLE IF EXISTS OM_DATASET;
+DROP TABLE IF EXISTS OM_DATASET_DV;
 DROP TABLE IF EXISTS OM_DATASET_EXECUTION;
 DROP TABLE IF EXISTS OM_DATASET_SPECIFICATION;
 DROP TABLE IF EXISTS OM_DATASET_T_AGG;
@@ -21,14 +26,27 @@ DROP TABLE IF EXISTS OM_DATASET_T_FILTER;
 DROP TABLE IF EXISTS OM_DATASET_T_HAVING;
 DROP TABLE IF EXISTS OM_DATASET_T_MAPPING;
 DROP TABLE IF EXISTS OM_DATASET_T_ORDER;
-DROP TABLE IF EXISTS ENTRY_AGGREGATORS;
-DROP TABLE IF EXISTS ENTRY_DATASET_MAPPINGS;
-DROP TABLE IF EXISTS ENTRY_DATASET_RELATIONSHIPS;
 DROP TABLE IF EXISTS OM_DATASET_RELATIONSHIPS;
-DROP TABLE IF EXISTS ENTRY_HAVING;
+DROP TABLE IF EXISTS GIT_ENTRY_ENTITY;
+DROP TABLE IF EXISTS GIT_ENTRY_FILTERS;
+DROP TABLE IF EXISTS GIT_ENTRY_ORDER;
+DROP TABLE IF EXISTS GIT_ENTRY_HAVING;
+DROP TABLE IF EXISTS GIT_ENTRY_PATH;
+DROP TABLE IF EXISTS GIT_ENTRY_AGGREGATORS;
+DROP TABLE IF EXISTS GIT_ENTRY_DATASET_MAPPINGS;
+DROP TABLE IF EXISTS GIT_ENTRY_DATASET_RELATIONSHIPS;
 DROP VIEW IF EXISTS OM_DATASET_INFORMATION;
+DROP VIEW IF EXISTS OM_RELATIONSHIPS;
 DROP VIEW IF EXISTS OM_DATASET_SPECIFICATION_INFORMATION;
-drop view if exists OM_RELATIONSHIPS;
+DROP TABLE IF EXISTS ENTRY_DV_MAPPINGS;
+DROP TABLE IF EXISTS ENTRY_DV_ENTITY;
+drop table if exists ENTRY_DV_PROPERTIES;
+drop table if exists GIT_ENTRY_DV_ENTITY;
+drop table if exists GIT_ENTRY_DV_MAPPINGS;
+drop table if exists GIT_ENTRY_DV_PROPERTIES;
+drop table if exists ENTRY_FILES;
+drop table if exists GIT_ENTRY_FILES;
+drop table if exists OM_DATASET_FILE;
 
 /********************** CREATION TABLES **********************/
 CREATE TABLE ENTRY_PATH (
@@ -345,33 +363,76 @@ CREATE TABLE GIT_ENTRY_DATASET_RELATIONSHIPS (
  );
 
 CREATE TABLE ENTRY_DV_ENTITY (
-	COD_ENTITY           text     ,
-	SW_STATUS_TRACKING_SATELLITE integer     ,
+	COD_ENTITY           text NOT NULL  PRIMARY KEY  ,
+	ENTITY_NAME          text     ,
+	ENTITY_TYPE          text     ,
+	COD_PATH             text     ,
 	NAME_STATUS_TRACKING_SATELLITE text     ,
-	SW_RECORD_TRACKING_SATELLITE integer     ,
 	NAME_RECORD_TRACKING_SATELLITE text     ,
-	SW_EFFECTIVITY_SATELLITE integer     ,
 	NAME_EFFECTIVITY_SATELLITE text     ,
-	RECORD_SOURCE        text     ,
-	ORIGIN_IS_INCREMENTAL integer     ,
-	ORIGIN_IS_TOTAL      integer     ,
-	ORIGIN_IS_CDC        integer     ,
 	OWNER                text
  );
 
 CREATE TABLE ENTRY_DV_MAPPINGS (
-	COD_ENTITY           text     ,
+	COD_ENTITY_SOURCE    text     ,
 	COLUMN_NAME_SOURCE   text     ,
+	COD_ENTITY_TARGET    text     ,
 	COLUMN_NAME_TARGET   text     ,
 	COLUMN_TYPE_TARGET   text     ,
 	ORDINAL_POSITION     text     ,
 	LENGTH               integer     ,
 	PRECISION            integer     ,
 	NUM_BRANCH           integer     ,
-	KEY_TYPE             integer     ,
+	NUM_CONNECTION       integer     ,
+	KEY_TYPE             text     ,
 	SATELLITE_NAME       text     ,
+	ORIGIN_IS_INCREMENTAL integer     ,
+	ORIGIN_IS_TOTAL      integer     ,
+	ORIGIN_IS_CDC        integer     ,
 	OWNER                text
  );
+
+CREATE TABLE ENTRY_DV_PROPERTIES (
+    COD_ENTITY           text     ,
+    NUM_CONNECTION       text     ,
+    HASH_NAME            text     ,
+    OWNER                text
+);
+
+ CREATE TABLE OM_DATASET_DV (
+	ID_DATASET           integer     ,
+	ID_ENTITY_TYPE       integer     ,
+	META_OWNER           text     ,
+	START_DATE           timestamp     ,
+	END_DATE             timestamp
+ );
+
+CREATE TABLE ENTRY_FILES (
+	COD_ENTITY           text     ,
+	FILE_PATH            text     ,
+	FILE_NAME            text     ,
+	DELIMITER_CHARACTER  text     ,
+	OWNER                text
+ );
+
+CREATE TABLE GIT_ENTRY_FILES (
+	COD_ENTITY           text     ,
+	FILE_PATH            text     ,
+	FILE_NAME            text     ,
+	DELIMITER_CHARACTER  text     ,
+	OWNER                text
+ );
+
+CREATE TABLE OM_DATASET_FILE (
+	ID_DATASET           integer     ,
+	FILE_PATH            text     ,
+	FILE_NAME            text     ,
+	DELIMITER_CHARACTER  text     ,
+	META_OWNER           text     ,
+	START_DATE           date     ,
+	END_DATE             date
+ );
+
 
 
 
@@ -417,7 +478,10 @@ INSERT INTO OM_REF_ENTITY_TYPE (ID_ENTITY_TYPE, ENTITY_TYPE_NAME, ENTITY_TYPE_DE
 (3, 'WITH', 'With Clause', 'With', 0),
 (4, 'HUB', 'Datavault - Hub', 'Hub', 1),
 (5, 'LINK', 'Datavault - Link', 'Link', 1),
-(6, 'SAT', ' Datavault - Satellite', 'Satellite', '1');
+(6, 'SAT', ' Datavault - Satellite', 'Satellite', 1),
+(7, 'STS', 'Datavault - Status Tracking Satellite', 'Status Tracking Satellite', 1),
+(8, 'RTS', 'Datavault - Satellite', 'Record Tracking Satellite', 1),
+(9, 'SATE', 'Datavault - Effectivity Satellite', 'Effectivity Satellite', 1);
 
 INSERT INTO OM_REF_JOIN_TYPE(ID_JOIN_TYPE, JOIN_NAME, JOIN_VALUE, JOIN_DESCRIPTION) VALUES
 (0, 'INNER JOIN', 'INNER JOIN', 'Returns only those rows that have matching values'),
@@ -428,7 +492,8 @@ INSERT INTO OM_REF_JOIN_TYPE(ID_JOIN_TYPE, JOIN_NAME, JOIN_VALUE, JOIN_DESCRIPTI
 INSERT INTO OM_REF_KEY_TYPE(ID_KEY_TYPE, KEY_TYPE_NAME, KEY_TYPE_DESCRIPTION) VALUES
 (0, 'PK', 'Primary Key'), (1, 'BK', 'Business Key'), (2,'NULL', 'Nothing'), (3,'SEQ', 'Sequence'),
 (4, 'FK', 'Foreign Key'), (5, 'HK', 'Hash Key'), (6, 'AT', 'Attribute'), (7 ,'ST','Status'),
-(8, 'DK', 'Driven Key');
+(8, 'DK', 'Driven Key'), (9, 'RS', 'Record Source'), (10, 'TN', 'Tenant'), (11,'HD', 'Hashdiff'),
+(12, 'DCK', 'Dependent-child key'), (13, 'AD', 'Applied Date');
 
 INSERT INTO OM_REF_ORDER_TYPE(ID_ORDER_TYPE, ORDER_TYPE_NAME, ORDER_TYPE_VALUE, ORDER_TYPE_DESCRIPTION) VALUES
 (0, 'Ascendant', 'ASC', 'Ascending order'),
@@ -445,4 +510,5 @@ INSERT INTO OM_REF_QUERY_TYPE(ID_QUERY_TYPE, QUERY_TYPE_NAME, QUERY_TYPE_DESCRIP
 
 INSERT INTO OM_PROPERTIES(PROPERTY, "VALUE", START_DATE) VALUES
 ('Version', '0.3.9b', CURRENT_TIMESTAMP()),
-('Module Deployed', 'ELT', CURRENT_TIMESTAMP());
+('Module Deployed', 'ELT', CURRENT_TIMESTAMP()),
+('Module Deployed', 'DV', CURRENT_TIMESTAMP());

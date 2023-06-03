@@ -9,7 +9,7 @@ class EngineInit(Engine):
     def _initialize_engine(self):
         self.engine_name = "Engine Init"
         self.engine_command = "init"
-        self.database_default = "sqlite"
+        self.database_default = CONNECTION_SQLITE.lower()
 
         self.metadata_database = None
         self.data_database = None
@@ -52,13 +52,13 @@ class EngineInit(Engine):
 
         # Read Template DATA
         file_controller_configuration_template = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH, CONFIGURATION_FILE_DATA + self.data_database + "." + FILE_TYPE_YML)
+        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH + '\\' + self.data_database.lower(), CONFIGURATION_FILE_DATA + self.data_database + "." + FILE_TYPE_YML)
         self.configuration_file = file_controller_configuration_template.read_file()
         file_controller_configuration.write_file(self.configuration_file)
 
         # Read Template METADATA
         file_controller_configuration_template = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH, CONFIGURATION_FILE_METADATA + self.metadata_database + "." + FILE_TYPE_YML)
+        file_controller_configuration_template.set_file_location(PACKAGE_PATH + '\\' + CONFIGURATION_FILE_PATH + '\\' + self.metadata_database.lower(), CONFIGURATION_FILE_METADATA + self.metadata_database + "." + FILE_TYPE_YML)
         self.configuration_file = file_controller_configuration_template.read_file()
         file_controller_configuration.write_file(self.configuration_file)
 

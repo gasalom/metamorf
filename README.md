@@ -69,11 +69,11 @@ To see if all works, you can just type any of the features that Metamorf offers:
 
 If you want to run the processes indicated on the metadata, you can just type:
 
-    metamorf run
+    metadata run
 
 Probably you just want the SQL Files to execute from other platforms, type then:
 
-    metamorf output
+    metadata output
 
 The results are located on the output folder on your repository.  
 
@@ -86,7 +86,7 @@ To achieve it, just change your *configuration.yml* file, **output** option, **t
 
 You can execute again 
     
-    metamorf output
+    metadata output
 
 And now you have all the necessary files for your dbt project.  
 

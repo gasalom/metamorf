@@ -61,7 +61,9 @@ class EngineRun(Engine):
             if index>=len(nodes): index = 0
 
         self.log.log(self.engine_name, "Finish the execution", LOG_LEVEL_INFO)
-        self.show_results(results_nodes)
+        if len(self.metadata.om_dataset)==0:
+            self.log.log(self.engine_name, "There is no nodes to execute", LOG_LEVEL_WARNING)
+        else: self.show_results(results_nodes)
         super().finish_execution()
 
     def show_results(self, nodes):

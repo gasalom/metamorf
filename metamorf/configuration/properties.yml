@@ -1,6 +1,6 @@
 name: "Metamorf"
-description: "Metadata Suite to control all your Datawarehouse metadata-driven"
-version: "0.3.9b"
+description: "Metadata Suite to build and manage your Datawarehouse metadata-driven"
+version: "0.4.1"
 author: "Guillermo Aumatell Salom"
 contact: "guillermoaumatell@gmail.com"
 
@@ -18,10 +18,10 @@ commands:
     args:
       - name: 'database'
         options: ['-d', '--database']
-        values: ['SQLite', 'Snowflake']
+        values: ['SQLite', 'Snowflake', 'MySQL', 'PostgreSQL']
       - name: 'metadata'
         options: ['-m', '--metadata']
-        values: ['SQLite', 'Snowflake']
+        values: ['SQLite', 'Snowflake', 'MySQL', 'PostgreSQL']
   - name: 'deploy'
     description: 'Deploys on the metadata database all the requirements.'
   - name: 'deploy-example'
@@ -72,11 +72,15 @@ commands:
     description: 'Downloads all the Metadata onto CSV Files to backup all the system'
   - name: 'restore'
     description: 'Restores all the metadata from a backup.'
+  - name: 'files'
+    description: 'Upload all the files that are indicated on the metadata.'
+  - name: 'metadata'
+    description: 'Validates Metadata Entry.'
 
 
 options:
   log_print: 'Y'
-  print_debug: 'Y'
+  print_debug: 'N'
   max_commit_batch: 100
 
 modules:
@@ -93,7 +97,7 @@ modules:
       - name: "status"
         values: ['ACTIVE','INACTIVE']
       - name: "char_separator_naming"
-        values: ['_', '__', '$', '&', '/']
+        values: ['_', '__', '$', '&', '/', '|','||']
 
 database:
   - name: 'SQLite'
@@ -102,6 +106,10 @@ database:
     mandatory_fields: ['snowflake_user', 'snowflake_password', 'snowflake_schema', 'snowflake_warehouse', 'snowflake_account', 'snowflake_database', 'snowflake_role']
   - name: 'Firebird'
     mandatory_fields: ['firebird_host', 'firebird_database', 'firebird_user', 'firebird_password']
+  - name: 'MySQL'
+    mandatory_fields: ['mysql_user', 'mysql_password', 'mysql_host', 'mysql_database']
+  - name: 'PostgreSQL'
+    mandatory_fields: ['postgres_user','postgres_password','postgres_host','postgres_database', 'postgres_schema']
 
 output:
   type: ['dbt', 'sql']
