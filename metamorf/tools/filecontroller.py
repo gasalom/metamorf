@@ -13,7 +13,7 @@ class FileController(ABC):
 
     def set_file_location(self, path: str, file_name: str):
         self.path = str(path)
-        self.file_name = str(file_name.lower())
+        self.file_name = str(file_name)
 
     @abstractmethod
     def read_file(self):

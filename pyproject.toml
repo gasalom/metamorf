@@ -1,6 +1,6 @@
 [project]
 name = "Metamorf"
-version = "0.4.3"
+version = "0.4.3.1"
 authors = [
   { name="Guillermo Aumatell", email="gaumatellsalom@gmail.com" },
 ]
