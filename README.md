@@ -30,6 +30,8 @@ datawarehouse in the past at any time and know how the data was processed.
 Actually Metamorf supports the following databases:
 - Snowflake
 - SQLite
+- PostgreSQL
+- MySQL
 
 ## How to Start
 To install Metamorf, you need Python 3.10, and you can install it using pip. 
@@ -44,7 +46,7 @@ For a quick start, create a directory where you want to locate all the configura
 
     metamorf init
 
-You have initialized your environment to configure Metamorf. The basic configuration is through
+At this point, you have initialized your environment to configure Metamorf. The default configuration is through
 a SQLite database.
   
 Metamorf can be deployed where the configuration file says. If SQLite is selected (as default)
@@ -67,7 +69,7 @@ If you want to process these metadata, try the command:
 Now all the metadata is processed and the main tables of Metamorf are populated.
 To see if all works, you can just type any of the features that Metamorf offers:
 
-If you want to run the processes indicated on the metadata, you can just type:
+If you want to run the processes indicated on the metadata to transform all the fake data, you can just type:
 
     metadata run
 
@@ -78,7 +80,7 @@ Probably you just want the SQL Files to execute from other platforms, type then:
 The results are located on the output folder on your repository.  
 
 The configuration file permits you to configure Metamorf to adapt it to your needs.
-For example, one interesting option could be to generate all you datasets on *dbt* format.
+For example, one interesting option could be to generate all your datasets on *dbt* format.
 To achieve it, just change your *configuration.yml* file, **output** option, **type** value to **dbt**.
 
       output:
@@ -92,7 +94,7 @@ And now you have all the necessary files for your dbt project.
 
 This tutorial is just a small demonstration about metamorf and its potential.
 
-*Note: First versions of Metamorf were only tested on Windows OS.*
+*Note: Metamorf works on Windows OS and Linux (tested on Ubuntu)*
 
 ## Commands
 
@@ -129,25 +131,32 @@ The user can specify the target databases type (data and metadata) with the argu
 - **delete**: It deletes all the metadata from the metadata entry.
 - **backup**: It downloads a backup from all the system.
 - **restore**: It uploads all the backup to the system.
+- **files**: Upload all the files indicated on the metadata.
+- **metadata**: Validates the Metadata Entry.
 
 <sup>1</sup> Actually Metamorf accepts the databases indicated on this [section](#databases)
 
+## New features
+
+- **Datavault** module to speed up the creation of a Datavault Model. New metadata entry was added.
+- File loader to upload csv files to the data database.
+- Added compatibility to PostgreSQL and MySQL for metadata and data databases.
+
+
 ## Roadmap
 
-- *[Under development]* Include Datavault 2.0 Module to simplify the metadata entry for this modelling.
-- *[Under development]* Include a metadata entry validator to avoid unexpected errors.
-- *[Near development]* Include File loader.
-- *[Near development]* Create a detailed documentation.
+- *[Under development]* Use case on Azure cloud.
+- *[Under development]* Improve the metadata entry validator to avoid unexpected errors.
+- *[Under development]* Create a detailed documentation.
 - *[Near development]* Include more materialization and more metadata transformation speeders.
 - *[Near development]* Include easier metadata entry system.
-- *[Near development]* Include some more databases as PostgreSQL and MySQL.
-- *[Future development]* Include more databases.
+- *[Near development]* Add an engine system to permits developpers add their own engines to speed up their own needs.
 - *[Future development]* Security Framework based on metadata for the datawarehouse
 
 ## Contact
 
 Creator: **Guillermo Aumatell Salom**  
-Email: **gaumatellsalom@gmail.com**
+Email: **guillermoaumatell@gmail.com**
 
 
-**Notice: Metamorf is in beta phase.**
+**Notice: Metamorf is in beta phase under development.**
