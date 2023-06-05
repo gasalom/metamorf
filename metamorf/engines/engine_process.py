@@ -712,7 +712,7 @@ class EngineProcess(Engine):
 
         ########################### Create Entity STG TMP ###########################
         md5_function = self.get_hash_key_from_cod_entity_target_and_num_branch(sat_cod_entity_target, sat[3])
-
+        hash_md5_function = md5_function
         new_dataset_mapping = [sat_cod_entity_source, md5_function, prefix_et + sat_entity_tmp,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
@@ -758,8 +758,10 @@ class EngineProcess(Engine):
                 self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
                 ordinal_position += 1
 
+        all_dck_concatenate = ''
         if has_dck:
             for dck in dependent_child_key:
+                all_dck_concatenate += ", " + dck.column_name_target
                 new_dataset_mapping = [sat_cod_entity_source, dck.column_name_source, prefix_et + sat_entity_tmp,
                                        dck.column_name_target,
                                        dck.column_type_target, ordinal_position, dck.column_length,
@@ -794,6 +796,21 @@ class EngineProcess(Engine):
                                prefix_et + sat_entity_tmp, 'HASHDIFF',
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
                                sat_num_branch, KEY_TYPE_HASHDIFF, 1, self.owner]
+        self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
+        ordinal_position += 1
+
+        order_by = ''
+        if has_ad:
+            order_by = ' order by ' + applied_date.column_name_source + ' desc'
+        if has_dck:
+            hash_md5_function += all_dck_concatenate
+        new_dataset_mapping = [sat_cod_entity_source,
+                               'ROW_NUMBER() over (partition by ' + hash_md5_function + order_by + ')',
+                               prefix_et + sat_entity_tmp, 'RN',
+                               integer_for_metadata[0], ordinal_position, integer_for_metadata[1],
+                               integer_for_metadata[2],
+                               sat_num_branch, KEY_TYPE_NULL, 1, self.owner]
+        ordinal_position += 1
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
 
         ########################### Create Entity STG LAST IMAGE 1 ###########################
@@ -958,6 +975,9 @@ class EngineProcess(Engine):
                                     prefix_et + sat_entity_actual_image_2,
                                     dck.column_name_target, "MASTER JOIN", self.owner]
                 self.metadata_actual.add_entry_dataset_relationship([new_relationship])
+
+        new_filter = [prefix_et + sat_entity_join, 'RN = 1', sat_num_branch , self.owner]
+        self.metadata_actual.add_entry_filters([new_filter])
 
         ########################### Create Entity SAT ###########################
         ordinal_position = 1
@@ -3936,6 +3956,7 @@ class EngineProcess(Engine):
 
         ########################### Create Entity STG TMP ###########################
         md5_function = self.get_hash_key_from_cod_entity_target_and_num_branch(sat_cod_entity_target, sat[3])
+        hash_md5_function = md5_function
         new_dataset_mapping = [sat_cod_entity_source, md5_function, prefix_et + sat_entity_tmp,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
@@ -3981,8 +4002,10 @@ class EngineProcess(Engine):
                 self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
                 ordinal_position += 1
 
+        all_dck_concatenate = ''
         if has_dck:
             for dck in dependent_child_key:
+                all_dck_concatenate += ", " + dck.column_name_target
                 new_dataset_mapping = [sat_cod_entity_source, dck.column_name_source, prefix_et + sat_entity_tmp,
                                        dck.column_name_target,
                                        dck.column_type_target, ordinal_position, dck.column_length,
@@ -4017,6 +4040,21 @@ class EngineProcess(Engine):
                                prefix_et + sat_entity_tmp, 'HASHDIFF',
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
                                sat_num_branch, KEY_TYPE_HASHDIFF, 1, self.owner]
+        self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
+        ordinal_position += 1
+
+        order_by = ''
+        if has_ad:
+            order_by = ' order by ' + applied_date.column_name_source + ' desc'
+        if has_dck:
+            hash_md5_function += all_dck_concatenate
+        new_dataset_mapping = [sat_cod_entity_source,
+                               'ROW_NUMBER() over (partition by ' + hash_md5_function + order_by + ' )',
+                               prefix_et + sat_entity_tmp, 'RN',
+                               integer_for_metadata[0], ordinal_position, integer_for_metadata[1],
+                               integer_for_metadata[2],
+                               sat_num_branch, KEY_TYPE_NULL, 1, self.owner]
+        ordinal_position += 1
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
 
         ########################### Create Entity STG LAST IMAGE 1 ###########################
@@ -4184,6 +4222,9 @@ class EngineProcess(Engine):
                                     prefix_et + sat_entity_actual_image_2,
                                     dck.column_name_target, "MASTER JOIN", self.owner]
                 self.metadata_actual.add_entry_dataset_relationship([new_relationship])
+
+        new_filter = [prefix_et + sat_entity_join, 'RN = 1', sat_num_branch, self.owner]
+        self.metadata_actual.add_entry_filters([new_filter])
 
         ########################### Create Entity SAT ###########################
         ordinal_position = 1
