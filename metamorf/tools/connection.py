@@ -131,6 +131,13 @@ class Connection(ABC):
     def get_string_for_metadata(self):
         pass
 
+    @abstractmethod
+    def get_if_is_null(self):
+        pass
+
+    @abstractmethod
+    def get_configuarion_of_connection_on_path(self, configuration, database, schema):
+        pass
 
 class ConnectionSQLite(Connection):
     def get_connection_type(self):
@@ -193,6 +200,13 @@ class ConnectionSQLite(Connection):
     def get_string_for_metadata(self):
         return ['TEXT', 0, 0]
 
+    def get_if_is_null(self):
+        return "IFNULL([x], '')"
+
+    def get_configuarion_of_connection_on_path(self, configuration, database, schema):
+        return configuration
+
+
 class ConnectionMySQL(Connection):
     def get_connection_type(self):
         return CONNECTION_MYSQL
@@ -207,6 +221,10 @@ class ConnectionMySQL(Connection):
             database = configuration['mysql_database']
         )
         self.log.log(self.engine_name, "Finished to connect to the MySQL database", LOG_LEVEL_ONLY_LOG)
+
+    def get_configuarion_of_connection_on_path(self, configuration, database, schema):
+        configuration['mysql_database'] = database
+        return configuration
 
     def setup_after_connection_established(self):
         self.activate_concate_with_pipes()
@@ -270,6 +288,9 @@ class ConnectionMySQL(Connection):
     def get_string_for_metadata(self):
         return ['VARCHAR', 0, 0]
 
+    def get_if_is_null(self):
+        return "IFNULL([x], '')"
+
 
 class ConnectionPostgreSQL(Connection):
     def get_connection_type(self):
@@ -285,6 +306,11 @@ class ConnectionPostgreSQL(Connection):
             options= '-c search_path='+configuration['postgres_schema']
         )
         self.log.log(self.engine_name, "Finished to connect to the PostgreSQL database", LOG_LEVEL_ONLY_LOG)
+
+    def get_configuarion_of_connection_on_path(self, configuration, database, schema):
+        configuration['postgres_database'] = database
+        configuration['postgres_schema'] = schema
+        return configuration
 
     def get_sysdate_value(self):
         return 'CURRENT_TIMESTAMP'
@@ -341,8 +367,41 @@ class ConnectionPostgreSQL(Connection):
     def get_string_for_metadata(self):
         return ['VARCHAR', 0, 0]
 
+    def get_if_is_null(self):
+        return "COALESCE([x], '')"
+
 
 class ConnectionFirebird(Connection):
+    def get_sysdate_value_infinite(self):
+        pass
+
+    def get_table_columns_definition(self, table_name):
+        pass
+
+    def does_table_exists(self, table_name):
+        pass
+
+    def get_hash_for_metadata(self):
+        pass
+
+    def get_sysdate_for_metadata(self):
+        pass
+
+    def get_cast_string_for_metadata(self):
+        pass
+
+    def get_integer_for_metadata(self):
+        pass
+
+    def get_string_for_metadata(self):
+        pass
+
+    def get_if_is_null(self):
+        pass
+
+    def get_sysdate_value(self):
+        pass
+
     def get_connection_type(self):
         return CONNECTION_FIREBIRD
 
@@ -377,6 +436,11 @@ class ConnectionSnowflake(Connection):
         except Exception as e:
             self.log.log(self.engine_name, "Trying to connect the Snowflake database finished", LOG_LEVEL_ONLY_LOG)
             self.log.log(self.engine_name, str(e), LOG_LEVEL_ERROR)
+
+    def get_configuarion_of_connection_on_path(self, configuration, database, schema):
+        configuration['snowflake_database'] = database
+        configuration['snowflake_schema'] = schema
+        return configuration
 
     def get_table_columns_definition(self, table_name):
         # ID, COLUMN NAME, TYPE, DEFAULT_VALUE, PK 0/1, IS_NULLABLE, LENGTH, PRECISION, SCALE
@@ -428,6 +492,9 @@ class ConnectionSnowflake(Connection):
 
     def get_string_for_metadata(self):
         return ['VARCHAR', 0, 0]
+
+    def get_if_is_null(self):
+        return "IFNULL([x], '')"
 
 
 #####################################################################################

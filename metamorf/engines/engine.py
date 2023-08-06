@@ -81,8 +81,9 @@ class Engine(ABC):
         if not self.configuration_file_loaded:
             self.log.log(self.engine_name, 'Configuration file not exists at "'+ ACTUAL_PATH + '"', LOG_LEVEL_ERROR)
 
-        self._initialize_config_modules()
-        self._initialize_config_api()
+        if self.configuration_file_loaded:
+            self._initialize_config_modules()
+            self._initialize_config_api()
 
         return result_configuration
 
