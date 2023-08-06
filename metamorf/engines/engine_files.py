@@ -20,9 +20,7 @@ class EngineFiles(Engine):
         self.connection_type = self.configuration_file['data']['connection_type']
         self.connection_data = ConnectionFactory().get_connection(self.configuration_file['data']['connection_type'])
         self.connection_metadata = ConnectionFactory().get_connection(self.configuration_file['metadata']['connection_type'])
-        self.connection_data.setup_connection(self.configuration_file['data'], self.log)
         self.connection_metadata.setup_connection(self.configuration_file['metadata'], self.log)
-
         self.metadata_actual = self.load_metadata(load_om=False, load_entry=True, load_ref=False, load_im=False, owner=self.owner)
         self.metadata_to_load = Metadata(self.log)
 
@@ -36,7 +34,13 @@ class EngineFiles(Engine):
         for file in self.metadata_actual.entry_files:
 
             self.log.log(self.engine_name, "Starting to upload ['"+str(os.path.join(file.file_path , file.file_name))+"'] file", LOG_LEVEL_INFO)
+
             entry_entity = self.metadata_actual.get_entry_entity_from_cod_entity(file.cod_entity)
+
+            path_entity = self.metadata_actual.get_entry_path_from_cod_path(entry_entity.cod_path)
+            # Prepare connection path
+            new_connection = self.connection_data.get_configuarion_of_connection_on_path(self.configuration_file['data'], path_entity.database_name, path_entity.schema_name)
+            self.connection_data.setup_connection(new_connection, self.log)
 
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
             file_reader.set_delimiter(file.delimiter_character)

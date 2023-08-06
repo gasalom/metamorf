@@ -1,5 +1,6 @@
 import datetime
 
+
 # METADATA - Entry Tables
 class EntryOrder:
 
@@ -47,6 +48,7 @@ class EntryFilters:
 
     def __str__(self):
         return "'"+self.cod_entity_target+"','"+self.value.replace("'","''")+"',"+str(self.num_branch)+",'"+self.owner+"'"
+
 
 class EntryHaving:
 
@@ -115,6 +117,7 @@ class EntryPath:
         if self.schema_name is not None and self.schema_name != '': schema_name = "'" + self.schema_name + "'"
         return "'"+self.cod_path+"'," + database_name+","+schema_name+",'"+self.owner + "'"
 
+
 class EntryFiles:
 
     def __init__(self, cod_entity: str, file_path: str, file_name: str, delimiter_character: str, owner: str):
@@ -136,6 +139,7 @@ class EntryFiles:
 class EntryDatasetMappings:
 
     def __init__(self, cod_entity_source: str, value_source: str, cod_entity_target: str, column_name_target: str, column_type_target: str, ordinal_position: int, column_length : int, column_precision: int, num_branch: int, key_type: str, sw_distinct: int, owner: str):
+        if key_type is None or key_type == '': key_type = 'NULL'
         self.cod_entity_source = cod_entity_source
         self.value_source = value_source
         self.cod_entity_target = cod_entity_target
@@ -158,6 +162,7 @@ class EntryDatasetMappings:
         key_type = 'NULL'
         if self.key_type is not None and self.key_type != '': key_type = "'"+self.key_type+"'"
         return "'"+self.cod_entity_source+"','"+self.value_source.replace("'","''")+"','"+self.cod_entity_target+"','" + self.column_name_target+"','"+self.column_type_target+"',"+str(self.ordinal_position) + "," + str(self.column_length)+","+str(self.column_precision)+","+str(self.num_branch)+","+key_type+","+str(self.sw_distinct)+",'"+self.owner+"'"
+
 
 class EntryDvMappings:
 
@@ -186,10 +191,14 @@ class EntryDvMappings:
         return "'" + self.cod_entity_source +"','"+self.column_name_source.replace("'","''")+"','"+self.cod_entity_target+"','"+self.column_name_target+"','"+self.column_type_target+"',"+str(self.ordinal_position)+","+str(self.column_length)+\
                 ","+str(self.column_precision) + ","+ str(self.num_branch)+","+str(self.num_connection)+",'"+self.key_type+"','"+self.satellite_name+"',"+str(self.origin_is_incremental)+","+str(self.origin_is_total)+","+str(self.origin_is_cdc)+",'"+self.owner+"'"
 
+
 class EntryDvEntry:
 
     def __init__(self, cod_entity, entity_name, entity_type, cod_path, name_status_tracking_satellite, name_record_tracking_satellite,
                 name_effectivity_satellite, owner):
+        if name_status_tracking_satellite is None: name_status_tracking_satellite = ''
+        if name_record_tracking_satellite is None: name_record_tracking_satellite = ''
+        if name_effectivity_satellite is None: name_effectivity_satellite = ''
         self.cod_entity = cod_entity
         self.entity_name = entity_name
         self.entity_type = entity_type
@@ -206,6 +215,7 @@ class EntryDvEntry:
         return "'"+self.cod_entity+"','"+self.entity_name+"','"+self.entity_type+"','"+self.cod_path+"','"+self.name_status_tracking_satellite+"','"+self.name_record_tracking_satellite+"',"+ \
                "'"+self.name_effectivity_satellite+"','"+self.owner+"'"
 
+
 class EntryDvProperties:
 
     def __init__(self, cod_entity, num_connection, hash_name, owner):
@@ -219,6 +229,7 @@ class EntryDvProperties:
 
     def __str__(self):
         return "'" + self.cod_entity + "'," + self.num_connection + ",'" + self.hash_name + "','" + self.owner + "'"
+
 
 # METADATA - Metamorf Tables
 class OmDataset:
@@ -242,6 +253,7 @@ class OmDataset:
         else: end_date = self.end_date
         return str(self.id_dataset) + ",'" + self.dataset_name + "'," + str(self.id_entity_type) + "," + str(self.id_path) + ",'" + self.meta_owner + "'," + self.start_date + "," + end_date
 
+
 class OmDatasetDv:
 
     def __init__(self, id_dataset, id_entity_type, meta_owner, start_date, end_date):
@@ -260,6 +272,7 @@ class OmDatasetDv:
         if self.end_date is None or self.end_date == '' or self.end_date=='NULL': end_date = "NULL"
         else: end_date = self.end_date
         return str(self.id_dataset) + ","+ str(self.id_entity_type) +",'"+self.meta_owner +"'," + self.start_date + "," + end_date
+
 
 class OmDatasetSpecification:
 
@@ -459,6 +472,7 @@ class OmDatasetPath:
         else: end_date = self.end_date
         return str(self.id_path)+","+database+","+schema+",'"+self.meta_owner+"',"+self.start_date+","+end_date
 
+
 class OmDatasetFile:
 
     def __init__(self, id_dataset, file_path, file_name, delimiter_character, meta_owner, start_date, end_date):
@@ -547,6 +561,8 @@ class OmDatasetHardcoded:
         return str(self.id_dataset_hardcoded)+","+str(self.id_dataset)+","+str(self.id_branch)+",'"+self.content+"','"+self.meta_owner+"',"+self.start_date+","+end_date
 
         # METADATA - Reference Tables
+
+
 class OmRefQueryType:
 
     def __init__(self, id_query_type, query_type_name, query_type_description):
@@ -590,6 +606,7 @@ class OmRefEntityType:
         self.entity_type_full_name = entity_type_full_name
         self.id_module = id_module
 
+
 class OmRefModules:
 
     def __init__(self, id_module, module_name, module_full_name, module_description):
@@ -597,6 +614,7 @@ class OmRefModules:
         self.module_name = module_name
         self.module_full_name = module_full_name
         self.module_description = module_description
+
 
 # IM Tables
 class OmDatasetInformation:
@@ -616,6 +634,7 @@ class OmDatasetInformation:
         self.query_type_description = query_type_description
         self.start_date = start_date
 
+
 class OmRelationships:
 
     def __init__(self, meta_owner, master_database_name, master_schema_name, master_dataset_name, master_column_name, detail_database_name, detail_schema_name, detail_dataset_name, detail_column_name, start_date):
@@ -630,6 +649,7 @@ class OmRelationships:
         self.detail_dataset_name = detail_dataset_name
         self.detail_column_name = detail_column_name
         self.start_date = start_date
+
 
 class OmDatasetSpecificationInformation:
 

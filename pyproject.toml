@@ -1,6 +1,6 @@
 [project]
 name = "Metamorf"
-version = "0.4.4.1"
+version = "0.4.4.2"
 authors = [
   { name="Guillermo Aumatell", email="gaumatellsalom@gmail.com" },
 ]
@@ -11,6 +11,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
 ]
 dependencies = [
     "snowflake-connector-python",

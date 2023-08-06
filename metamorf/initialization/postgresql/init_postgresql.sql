@@ -479,8 +479,8 @@ CREATE TABLE OM_DATASET_FILE (
 	FILE_NAME            text     ,
 	DELIMITER_CHARACTER  text     ,
 	META_OWNER           text     ,
-	START_DATE           date     ,
-	END_DATE             date
+	START_DATE           timestamp     ,
+	END_DATE             timestamp
  );
 
 

@@ -40,9 +40,7 @@ class EngineProcess(Engine):
 
         # If there's nothing to load it finishes the execution
         if len(self.metadata_actual.entry_entity)==0:
-            self.log.log(self.engine_name, "There is nothing to process.", LOG_LEVEL_WARNING)
-            super().finish_execution(True)
-            return
+            self.log.log(self.engine_name, "There are no entities loaded, some datasets might be decommissioned", LOG_LEVEL_WARNING)
 
         self.get_next_ids()
 
@@ -278,7 +276,7 @@ class EngineProcess(Engine):
 
         bk_concatenate = ''
         for bk in entry_dv_mapping_bk:
-            bk_final = cast_to_string.replace('[x]', bk.column_name_source)
+            bk_final = cast_to_string.replace('[x]', self.connection.get_if_is_null().replace('[x]', bk.column_name_source))
             bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
         bk_concatenate = bk_concatenate[:-(len(self.module_dv_char_separator_naming) + 6)]
 
@@ -761,7 +759,7 @@ class EngineProcess(Engine):
         all_dck_concatenate = ''
         if has_dck:
             for dck in dependent_child_key:
-                all_dck_concatenate += ", " + dck.column_name_target
+                all_dck_concatenate += ", " + dck.column_name_source
                 new_dataset_mapping = [sat_cod_entity_source, dck.column_name_source, prefix_et + sat_entity_tmp,
                                        dck.column_name_target,
                                        dck.column_type_target, ordinal_position, dck.column_length,
@@ -4005,7 +4003,7 @@ class EngineProcess(Engine):
         all_dck_concatenate = ''
         if has_dck:
             for dck in dependent_child_key:
-                all_dck_concatenate += ", " + dck.column_name_target
+                all_dck_concatenate += ", " + dck.column_name_source
                 new_dataset_mapping = [sat_cod_entity_source, dck.column_name_source, prefix_et + sat_entity_tmp,
                                        dck.column_name_target,
                                        dck.column_type_target, ordinal_position, dck.column_length,
@@ -4666,7 +4664,7 @@ class EngineProcess(Engine):
         for dataset in [x for x in self.metadata_actual.om_dataset if x.id_entity_type == self.metadata_actual.get_entity_type_from_entity_type_name(ENTITY_SRC).id_entity_type]:
             if dataset.dataset_name not in sources_loaded and dataset.end_date is None:
                 close_source = [dataset.id_dataset, dataset.dataset_name, dataset.id_entity_type,
-                                dataset.id_path, "'" + dataset.meta_owner + "'", "'" + str(dataset.start_date) + "'",
+                                dataset.id_path, dataset.meta_owner, "'" + str(dataset.start_date) + "'",
                                 self.connection_metadata.get_sysdate_value()]
                 self.metadata_to_load.add_om_dataset([close_source])
 
@@ -4732,12 +4730,6 @@ class EngineProcess(Engine):
                         dataset = self.metadata_to_load.get_dataset_from_dataset_name(dataset.dataset_name)
                         tmp_loaded.append([dataset.dataset_name, dataset.id_entity_type, id_path])
 
-                # Get Dataset Specifications from Data Database
-                variable_connection = self.configuration_file['data']['connection_type'].lower() + "_database"
-                configuration_connection_data = self.configuration_file['data']
-                configuration_connection_data[variable_connection] = (
-                    self.metadata_to_load.get_path_from_id_path(id_path)).database_name
-                # self.connection.setup_connection(configuration_connection_data, self.log)
                 table_definition = self.metadata_actual.get_cols_from_cod_entity_on_entry(entity.cod_entity)
                 # Source Specification
                 if dataset is None:
@@ -4850,7 +4842,8 @@ class EngineProcess(Engine):
                             tmp_specs_loaded.append([dataset.id_dataset, table_definition_spec.column_name])
 
         # Close tables that not arrive anymore
-        for dataset in [x for x in self.metadata_actual.om_dataset if x.id_entity_type == self.metadata_actual.get_entity_type_from_entity_type_name(ENTITY_TB).id_entity_type
+        for dataset in [x for x in self.metadata_actual.om_dataset
+                        if x.id_entity_type == self.metadata_actual.get_entity_type_from_entity_type_name(ENTITY_TB).id_entity_type
                         or x.id_entity_type== self.metadata_actual.get_entity_type_from_entity_type_name(ENTITY_WITH).id_entity_type]:
             if [dataset.dataset_name, dataset.id_entity_type, dataset.id_path] not in tmp_loaded and dataset.end_date is None:
                 close_source = [dataset.id_dataset, dataset.dataset_name, dataset.id_entity_type,
@@ -5177,10 +5170,8 @@ class EngineProcess(Engine):
             all_columns_from_source = self.metadata_to_load.get_all_columns_from_table_name(
                 self.metadata_actual.get_table_name_from_cod_entity_on_entry(mapping.cod_entity_source))
             for col in all_columns_from_source:
-                if re.search(r"\s+|\(," + col + "\s+|\)|,", value_mapping) or re.search(r"(^" + col + "$)",
-                                                                                        value_mapping):
-                    dataset_spec_source = self.metadata_to_load.get_dataset_spec_from_id_dataset_and_column_name(
-                        dataset_source.id_dataset, col)
+                if re.search(r"\b" + col + r"\b", value_mapping) or re.search(r"(^" + col + "$)", value_mapping):
+                    dataset_spec_source = self.metadata_to_load.get_dataset_spec_from_id_dataset_and_column_name(dataset_source.id_dataset, col)
                     value_mapping = re.sub(col, "[" + str(dataset_spec_source.id_dataset_spec) + "]", value_mapping)
 
             dataset_t_mapping = self.metadata_actual.get_dataset_t_mapping_from_id_branch_and_id_dataset_spec_and_value_mapping(
@@ -5309,7 +5300,7 @@ class EngineProcess(Engine):
                 all_columns_from_source = self.metadata_to_load.get_all_columns_from_table_name(
                     dataset_source.dataset_name)
                 for col in all_columns_from_source:
-                    if re.search(r"\s+|\(," + col + "\s+|\)|,", value_having) or re.search(r"(^" + col + "$)", value_having):
+                    if re.search(r"\b" + col + "\b", value_having) or re.search(r"(^" + col + "$)", value_having):
                         dataset_spec_source = self.metadata_to_load.get_dataset_spec_from_id_dataset_and_column_name(
                             dataset_source.id_dataset, col)
                         value_having = re.sub(col, "[" + str(dataset_spec_source.id_dataset_spec) + "]", value_having)
