@@ -14,19 +14,19 @@ class FileController(ABC):
     def set_file_location(self, path: str, file_name: str):
         self.path = str(path)
         self.file_name = str(file_name)
+        if self.path is None or self.path == "":
+            self.final_path = self.file_name + "." + self.extension
+        else:
+            if self.file_name[-4:] != "." + self.extension:
+                self.file_name += "." + self.extension
+            self.final_path = self.path + "/" + self.file_name
 
     @abstractmethod
     def read_file(self):
         pass
 
     def setup_writer(self, append: str):
-        if self.path is None or self.path == "":
-            final_path = self.file_name + "." + self.extension
-        else:
-            if self.file_name[-4:] != "." + self.extension:
-                self.file_name += "." + self.extension
-            final_path = self.path + "/" + self.file_name
-        self.file = open(final_path, append)
+        self.file = open(self.final_path, append)
 
     def write_file(self, content: str):
         self.file.write(content)

@@ -158,6 +158,7 @@ class ConfigValidator:
                         self.log.log(self.configvalidator_name, 'ConfigurationFile - Module: ' + m['name'] + ' -> Function: '+ key + ' doesn\'t exist', LOG_LEVEL_ERROR)
                         return False
                     values = self.get_options_from_function_and_module(m['name'], key)
+                    if self.get_accept_all_values(m['name'], key): continue
                     if value not in values:
                         self.log.log(self.configvalidator_name, 'ConfigurationFile - Module: ' + m['name'] + ' -> Function: [' + key + '] has an impossible value', LOG_LEVEL_ERROR)
                         return False
@@ -242,6 +243,16 @@ class ConfigValidator:
                     if x['name'] == function_name:
                         values = x['values']
         return values
+
+    def get_accept_all_values(self, module_name: str, function_name: str):
+        for m in self.properties_file['modules']:
+            if m['name'] == module_name:
+                for x in m['functions']:
+                    if x['name'] == function_name:
+                        if 'accept_all_values' in x:
+                            if x['accept_all_values'].upper() == 'Y':
+                                return True
+        return False
 
     def get_mandatory_fields_from_database(self, database_name: str):
         result = []

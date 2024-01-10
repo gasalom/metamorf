@@ -14,6 +14,10 @@ class Node:
         self.name = name
         self.status = NODE_STATUS_WAITING
         self.time = 0
+        self.id = -1
+
+    def set_node_id(self, id):
+        self.id = id
 
     def set_node_type(self, node_type: int):
         self.query.set_type(node_type)

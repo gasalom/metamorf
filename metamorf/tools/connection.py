@@ -4,10 +4,10 @@ import snowflake.connector
 import mysql.connector
 from metamorf.constants import *
 import hashlib
-import fdb
 import psycopg2
 from metamorf.tools.log import Log
 from metamorf.tools.database_objects import Column
+
 
 class Connection(ABC):
 
@@ -15,12 +15,20 @@ class Connection(ABC):
         self.conn = None
         self.is_executing = False
         self.engine_name = "Connection"
+        self.database = None
+        self.schema = None
 
     def setup_connection(self, configuration: dict, log: Log):
         self.log = log
-        self.get_connection(configuration)
-        self._get_cursor()
-        self.setup_after_connection_established()
+        try:
+            self.get_connection(configuration)
+            if self.conn is None: return False
+            self._get_cursor()
+            self.setup_after_connection_established()
+            return True
+        except Exception as e:
+            self.log.log(self.engine_name, "Error trying to connect to " + self.get_connection_type() + " database", LOG_LEVEL_ERROR)
+            return False
 
     @abstractmethod
     def get_connection(self, configuration: dict):
@@ -43,7 +51,7 @@ class Connection(ABC):
         pass
 
     @abstractmethod
-    def does_table_exists(self, table_name):
+    def does_table_exists(self, table_name, schema_name, database_name):
         pass
 
     def setup_after_connection_established(self):
@@ -108,11 +116,12 @@ class Connection(ABC):
     def get_query_result(self):
         return self.cursor.fetchall()
 
+    @abstractmethod
     def get_md5_function(self):
-        return "MD5([x])"
+        pass
 
     @abstractmethod
-    def get_hash_for_metadata(self):
+    def get_sha256_function(self):
         pass
 
     @abstractmethod
@@ -139,12 +148,36 @@ class Connection(ABC):
     def get_configuarion_of_connection_on_path(self, configuration, database, schema):
         pass
 
+    @abstractmethod
+    def get_data_types(self):
+        pass
+
+    @abstractmethod
+    def get_schemas_available(self):
+        pass
+
+    @abstractmethod
+    def get_databases_available(self):
+        pass
+
+    def create_schema(self, schema_name):
+        return self.execute("CREATE SCHEMA " + schema_name)
+
+    def create_database(self, database_name):
+        return self.execute("CREATE DATABASE " + database_name)
+
+
 class ConnectionSQLite(Connection):
+
     def get_connection_type(self):
         return CONNECTION_SQLITE
 
     def get_connection(self, configuration: dict):
         self.log.log(self.engine_name, "Trying to connect to the SQLite database", LOG_LEVEL_ONLY_LOG)
+
+        self.database = 'MAIN'
+        self.schema = None
+
         self.conn = sqlite3.connect(configuration['sqlite_path'])
         sqlite3.enable_callback_tracebacks(True)
         self.log.log(self.engine_name, "Connection to the SQLite database established", LOG_LEVEL_ONLY_LOG)
@@ -154,10 +187,18 @@ class ConnectionSQLite(Connection):
         final_word = str(word)
         return hashlib.md5(final_word.encode('utf-8')).hexdigest()
 
+    def _sha256(self,word):
+        final_word = str(word)
+        return hashlib.sha256(final_word.encode('utf-8')).hexdigest()
+
     def setup_after_connection_established(self):
         self.log.log(self.engine_name, "Adding MD5 Function to the SQLite Database", LOG_LEVEL_ONLY_LOG)
         self.conn.create_function("MD5", 1, self._md5)
         self.log.log(self.engine_name, "Added MD5 Function to the SQLite Database", LOG_LEVEL_ONLY_LOG)
+
+        self.log.log(self.engine_name, "Adding SHA256 Function to the SQLite Database", LOG_LEVEL_ONLY_LOG)
+        self.conn.create_function("SHA256", 1, self._sha256)
+        self.log.log(self.engine_name, "Added SHA256 Function to the SQLite Database", LOG_LEVEL_ONLY_LOG)
 
     def get_sysdate_value(self):
         return 'datetime(\'now\')'
@@ -178,15 +219,12 @@ class ConnectionSQLite(Connection):
             all_columns.append(Column(r[0], r[1], r[2], r[4], pk_result, is_nullable,0,0,0))
         return all_columns
 
-    def does_table_exists(self, table_name):
+    def does_table_exists(self, table_name, schema_name, database_name):
         query_to_execute = "PRAGMA TABLE_INFO(" + table_name + ")"
         self.execute(query_to_execute)
         result = self.get_query_result()
         if len(result)>0: return True
         return False
-
-    def get_hash_for_metadata(self):
-        return ['TEXT', 0, 0]
 
     def get_sysdate_for_metadata(self):
         return ['TEXT', 0, 0]
@@ -206,6 +244,21 @@ class ConnectionSQLite(Connection):
     def get_configuarion_of_connection_on_path(self, configuration, database, schema):
         return configuration
 
+    def get_data_types(self):
+        return DATA_TYPES_SQLITE
+
+    def get_md5_function(self):
+        return "MD5([x])", ['TEXT', 0, 0]
+
+    def get_sha256_function(self):
+        return "SHA256([x])", ['TEXT', 0, 0]
+
+    def get_schemas_available(self):
+        return [None]
+
+    def get_databases_available(self):
+        return ['MAIN']
+
 
 class ConnectionMySQL(Connection):
     def get_connection_type(self):
@@ -213,6 +266,9 @@ class ConnectionMySQL(Connection):
 
     def get_connection(self, configuration: dict):
         self.log.log(self.engine_name, "Trying to connect to the MySQL database", LOG_LEVEL_ONLY_LOG)
+
+        self.database = configuration['mysql_database']
+        self.schema = None
 
         self.conn = mysql.connector.connect(
             user = configuration['mysql_user'],
@@ -266,15 +322,12 @@ class ConnectionMySQL(Connection):
             all_columns.append(Column(r[0], r[1], r[2], r[3], pk_result, is_nullable, length, precision, scale))
         return all_columns
 
-    def does_table_exists(self, table_name):
-        query_to_execute = "select column_name FROM information_schema.columns WHERE table_name = '" + table_name + "'"
+    def does_table_exists(self, table_name, schema_name, database_name):
+        query_to_execute = "select column_name FROM information_schema.columns WHERE table_name = '" + table_name + "' and table_schema = '" + database_name + "'"
         self.execute(query_to_execute)
         result = self.get_query_result()
         if len(result) > 0: return True
         return False
-
-    def get_hash_for_metadata(self):
-        return ['BINARY', 32, 0]
 
     def get_sysdate_for_metadata(self):
         return ['DATETIME', 0, 0]
@@ -291,6 +344,26 @@ class ConnectionMySQL(Connection):
     def get_if_is_null(self):
         return "IFNULL([x], '')"
 
+    def get_data_types(self):
+        return DATA_TYPES_MYSQL
+
+    def get_sha256_function(self):
+        return ("SHA2([x], 256)",['BINARY', 64, 0])
+
+    def get_md5_function(self):
+        return ("MD5([x])",['BINARY', 32, 0])
+
+    def get_schemas_available(self):
+        return [None]
+
+    def get_databases_available(self):
+        all_databases_available = []
+        self.execute("SHOW DATABASES")
+        result = self.get_query_result()
+        for x in result:
+            all_databases_available.append(x[0])
+        return all_databases_available
+
 
 class ConnectionPostgreSQL(Connection):
     def get_connection_type(self):
@@ -298,6 +371,10 @@ class ConnectionPostgreSQL(Connection):
 
     def get_connection(self, configuration: dict):
         self.log.log(self.engine_name, "Trying to connect to the PostgreSQL database", LOG_LEVEL_ONLY_LOG)
+
+        self.database = configuration['postgres_database']
+        self.schema = configuration['postgres_schema']
+
         self.conn = psycopg2.connect(
             user = configuration['postgres_user'],
             password = configuration['postgres_password'],
@@ -344,16 +421,13 @@ class ConnectionPostgreSQL(Connection):
             all_columns.append(Column(r[0], r[1].upper(), r[2].upper(), r[3], pk_result, is_nullable, length, precision, scale))
         return all_columns
 
-    def does_table_exists(self, table_name):
+    def does_table_exists(self, table_name, schema_name, database_name):
         table_name = table_name.lower()
-        query_to_execute = "select column_name FROM information_schema.columns WHERE table_name = '" + table_name + "'"
+        query_to_execute = "select column_name FROM information_schema.columns WHERE table_name = '" + table_name + "' and table_schema = '" + schema_name + "' and table_catalog = '" + database_name + "'"
         self.execute(query_to_execute)
         result = self.get_query_result()
         if len(result) > 0: return True
         return False
-
-    def get_hash_for_metadata(self):
-        return ['TEXT', 0, 0]
 
     def get_sysdate_for_metadata(self):
         return ['TIMESTAMP', 0, 0]
@@ -370,57 +444,48 @@ class ConnectionPostgreSQL(Connection):
     def get_if_is_null(self):
         return "COALESCE([x], '')"
 
+    def get_data_types(self):
+        return DATA_TYPES_POSTGRESQL
 
-class ConnectionFirebird(Connection):
-    def get_sysdate_value_infinite(self):
-        pass
+    def get_sha256_function(self):
+        return "SHA256(CAST([x] as bytea))" , ['bytea', 0, 0]
 
-    def get_table_columns_definition(self, table_name):
-        pass
+    def get_md5_function(self):
+        return "DECODE(MD5([x]), 'hex')", ['bytea', 0, 0]
 
-    def does_table_exists(self, table_name):
-        pass
+    def get_schemas_available(self):
+        all_schemas_available = []
+        self.execute("SELECT schema_name FROM information_schema.schemata where schema_name not in ('pg_toast', 'pg_catalog', 'public', 'information_schema')")
+        result = self.get_query_result()
+        for x in result:
+            all_schemas_available.append(x[0])
+        return all_schemas_available
 
-    def get_hash_for_metadata(self):
-        pass
+    def get_databases_available(self):
+        all_databases_available = []
+        self.execute("SELECT datname FROM pg_database where datname not in ('template1', 'template0', 'postgres')")
+        result = self.get_query_result()
+        for x in result:
+            all_databases_available.append(x[0])
+        return all_databases_available
 
-    def get_sysdate_for_metadata(self):
-        pass
-
-    def get_cast_string_for_metadata(self):
-        pass
-
-    def get_integer_for_metadata(self):
-        pass
-
-    def get_string_for_metadata(self):
-        pass
-
-    def get_if_is_null(self):
-        pass
-
-    def get_sysdate_value(self):
-        pass
-
-    def get_connection_type(self):
-        return CONNECTION_FIREBIRD
-
-    def get_connection(self, configuration: dict):
-        self.conn = fdb.connect(
-            host=configuration['firebird_host'],
-            database=configuration['firebird_database'],
-            user=configuration['firebird_user'],
-            password=configuration['firebird_password']
-        )
-
+    def create_database(self, database_name):
+        self.conn.autocommit = True
+        result = self.execute("CREATE DATABASE " + database_name)
+        self.conn.autocommit = False
+        return result
 
 class ConnectionSnowflake(Connection):
+
     def get_connection_type(self):
         return CONNECTION_SNOWFLAKE
 
     def get_connection(self, configuration: dict):
         self.log.log(self.engine_name, "Trying to connect to the Snowflake database", LOG_LEVEL_ONLY_LOG)
-        self.schema_connection = configuration['snowflake_schema']
+
+        self.database = configuration['snowflake_database']
+        self.schema = configuration['snowflake_schema']
+        self.warehouse = configuration['snowflake_warehouse']
         try:
             self.conn = snowflake.connector.connect(
                 user = configuration['snowflake_user'],
@@ -446,7 +511,7 @@ class ConnectionSnowflake(Connection):
         # ID, COLUMN NAME, TYPE, DEFAULT_VALUE, PK 0/1, IS_NULLABLE, LENGTH, PRECISION, SCALE
         query_to_execute = "select ORDINAL_POSITION, COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT, 0 as IS_PK, "+\
                            " CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION, NUMERIC_SCALE "+\
-                           " from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='"+table_name+"' and TABLE_SCHEMA = '"+self.schema_connection+"'"
+                           " from INFORMATION_SCHEMA.COLUMNS where TABLE_NAME='"+table_name+"' and TABLE_SCHEMA = '"+self.schema+"'"
         self.execute(query_to_execute)
         result = self.get_query_result()
         all_columns = []
@@ -465,21 +530,18 @@ class ConnectionSnowflake(Connection):
             all_columns.append(Column(r[0], r[1], r[2], r[4], pk_result, is_nullable, length, precision, scale))
         return all_columns
 
-    def does_table_exists(self, table_name):
-        query_to_execute = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + table_name + "'"
+    def does_table_exists(self, table_name, schema_name, database_name):
+        query_to_execute = "SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='" + table_name + "' and TABLE_SCHEMA='" + schema_name + "' and TABLE_CATALOG = '" + database_name + "'"
         self.execute(query_to_execute)
         result = self.get_query_result()
         if len(result) > 0: return True
         return False
 
     def get_sysdate_value(self):
-        return 'CURRENT_TIMESTAMP()'
+        return 'SYSDATE()'
 
     def get_sysdate_value_infinite(self):
         return "TO_TIMESTAMP(\'9999-12-31 00:00:00\', \'YYYY-MM-DD HH24:MI:SS\')"
-
-    def get_hash_for_metadata(self):
-        return ['VARCHAR', 0, 0]
 
     def get_sysdate_for_metadata(self):
         return ['TIMESTAMP', 0, 0]
@@ -496,6 +558,34 @@ class ConnectionSnowflake(Connection):
     def get_if_is_null(self):
         return "IFNULL([x], '')"
 
+    def get_data_types(self):
+        return DATA_TYPES_SNOWFLAKE
+
+    def get_sha256_function(self):
+        return "SHA2_BINARY([x])", ['BINARY', 0, 0]
+
+    def get_md5_function(self):
+        return "MD5_BINARY([x])", ['BINARY', 0, 0]
+
+    def get_databases_available(self):
+        all_databases_available = []
+        self.execute("SHOW DATABASES")
+        result = self.get_query_result()
+        for x in result:
+            all_databases_available.append(x[1])
+        return all_databases_available
+
+    def get_schemas_available(self):
+        all_schemas_available = []
+        self.execute("SHOW SCHEMAS")
+        result = self.get_query_result()
+        for x in result:
+            all_schemas_available.append(x[1])
+        return all_schemas_available
+
+    def setup_after_connection_established(self):
+        self.execute("USE WAREHOUSE "+ self.warehouse)
+
 
 #####################################################################################
 
@@ -505,8 +595,6 @@ class ConnectionFactory:
             return ConnectionSnowflake()
         elif name_connection.upper() == CONNECTION_SQLITE.upper():
             return ConnectionSQLite()
-        elif name_connection.upper() == CONNECTION_FIREBIRD.upper():
-            return ConnectionFirebird()
         elif name_connection.upper() == CONNECTION_MYSQL.upper():
             return ConnectionMySQL()
         elif name_connection.upper() == CONNECTION_POSTGRESQL.upper():

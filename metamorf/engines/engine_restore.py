@@ -15,9 +15,9 @@ class EngineRestore(Engine):
     def run(self):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
         super().start_execution()
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         self.connection = ConnectionFactory().get_connection(connection_type)
-        self.connection.setup_connection(self.configuration_file['metadata'], self.log)
+        self.connection.setup_connection(self.configuration['metadata'], self.log)
 
         result_delete = self.delete_all_entry_from_owner()
         if not result_delete:
@@ -32,7 +32,7 @@ class EngineRestore(Engine):
     def delete_all_entry_from_owner(self):
         result = True
         self.log.log(self.engine_name, "Starting deleting Metadata on database" , LOG_LEVEL_INFO)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         metadata_tables = [TABLE_OM_DATASET, TABLE_OM_DATASET_EXECUTION, TABLE_OM_DATASET_T_ORDER,
                            TABLE_OM_DATASET_T_AGG, TABLE_OM_DATASET_T_DISTINCT, TABLE_OM_DATASET_SPECIFICATION,
                            TABLE_OM_DATASET_RELATIONSHIPS, TABLE_OM_DATASET_T_MAPPING, TABLE_OM_DATASET_T_FILTER,
@@ -62,7 +62,7 @@ class EngineRestore(Engine):
         self.log.log(self.engine_name, "Starting uploading Metadata Entry on database", LOG_LEVEL_INFO)
         result = True
         metadata = Metadata(self.log)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
 
         # TABLE_OM_DATASET
         file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)

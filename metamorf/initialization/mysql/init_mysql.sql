@@ -50,403 +50,402 @@ drop table if exists OM_DATASET_FILE;
 
 /********************** CREATION TABLES **********************/
 CREATE TABLE ENTRY_PATH ( 
-	COD_PATH           varchar(200)  NOT NULL    ,
-	DATABASE_NAME      varchar(200)      ,
-	SCHEMA_NAME        varchar(200)      ,
-	OWNER              varchar(200)  NOT NULL    ,
+	COD_PATH           varchar(300)  NOT NULL    ,
+	DATABASE_NAME      varchar(300)      ,
+	SCHEMA_NAME        varchar(300)      ,
+	OWNER              varchar(300)  NOT NULL    ,
 	CONSTRAINT Pk_ENTRY_PATH_COD_PATH PRIMARY KEY ( COD_PATH, OWNER )
  );
 
-CREATE TABLE GIT_ENTRY_PATH ( 
-	COD_PATH           varchar(200)  NOT NULL    ,
-	DATABASE_NAME      varchar(200)      ,
-	SCHEMA_NAME        varchar(200)      ,
-	OWNER              varchar(200)  NOT NULL    ,
+CREATE TABLE GIT_ENTRY_PATH (
+	COD_PATH           varchar(300)  NOT NULL    ,
+	DATABASE_NAME      varchar(300)      ,
+	SCHEMA_NAME        varchar(300)      ,
+	OWNER              varchar(300)  NOT NULL    ,
 	CONSTRAINT Pk_ENTRY_PATH_COD_PATH_0 PRIMARY KEY ( COD_PATH, OWNER )
  );
 
-CREATE TABLE OM_DATASET_HARDCODED ( 
+CREATE TABLE OM_DATASET_HARDCODED (
 	ID_DATASET_HARDCODED int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_BRANCH          int      ,
-	CONTENT            varchar(200)      ,
-	META_OWNER         varchar(200)      ,
+	CONTENT            varchar(300)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
 ALTER TABLE OM_DATASET_HARDCODED COMMENT 'Sustituo del mapping. ¿Debería incluirse en specifications entonces?';
 
-CREATE TABLE OM_DATASET_PATH ( 
+CREATE TABLE OM_DATASET_PATH (
 	ID_PATH            int  NOT NULL,
-	DATABASE_NAME      varchar(200)      ,
-	SCHEMA_NAME        varchar(200)      ,
-	META_OWNER         varchar(200)      ,
+	DATABASE_NAME      varchar(300)      ,
+	SCHEMA_NAME        varchar(300)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime      ,
-	CONSTRAINT Unq_OM_PATH_ID_PATH UNIQUE ( ID_PATH ) 
+	CONSTRAINT Unq_OM_PATH_ID_PATH UNIQUE ( ID_PATH )
  );
 
-CREATE TABLE OM_PROPERTIES ( 
-	PROPERTY           varchar(200)      ,
-	VALUE              varchar(200)      ,
+CREATE TABLE OM_PROPERTIES (
+	PROPERTY           varchar(300)      ,
+	VALUE              varchar(300)      ,
 	START_DATE         datetime
  );
 
-CREATE TABLE OM_REF_JOIN_TYPE ( 
+CREATE TABLE OM_REF_JOIN_TYPE (
 	ID_JOIN_TYPE       int  NOT NULL,
-	JOIN_NAME          varchar(200)      ,
-	JOIN_VALUE         varchar(200)      ,
-	JOIN_DESCRIPTION   varchar(200)      ,
-	CONSTRAINT Unq_OEM_REF_JOIN_TYPE_JOIN_NAME UNIQUE ( JOIN_NAME ) 
+	JOIN_NAME          varchar(300)      ,
+	JOIN_VALUE         varchar(300)      ,
+	JOIN_DESCRIPTION   varchar(300)      ,
+	CONSTRAINT Unq_OEM_REF_JOIN_TYPE_JOIN_NAME UNIQUE ( JOIN_NAME )
  );
 
-CREATE TABLE OM_REF_KEY_TYPE ( 
+CREATE TABLE OM_REF_KEY_TYPE (
 	ID_KEY_TYPE        int  NOT NULL,
-	KEY_TYPE_NAME      varchar(200)      ,
-	KEY_TYPE_DESCRIPTION varchar(200)      ,
-	CONSTRAINT Unq_OM_REF_KEY_TYPE_KEY_TYPE_NAME UNIQUE ( KEY_TYPE_NAME ) 
+	KEY_TYPE_NAME      varchar(300)      ,
+	KEY_TYPE_DESCRIPTION varchar(300)      ,
+	CONSTRAINT Unq_OM_REF_KEY_TYPE_KEY_TYPE_NAME UNIQUE ( KEY_TYPE_NAME )
  );
 
-CREATE TABLE OM_REF_MODULES ( 
+CREATE TABLE OM_REF_MODULES (
 	ID_MODULE          int      ,
-	MODULE_NAME        varchar(200)      ,
-	MODULE_FULL_NAME   varchar(200)      ,
-	MODULE_DESCRIPTION varchar(200)      ,
-	CONSTRAINT Unq_OM_REF_MODULES_ID_MODULE UNIQUE ( ID_MODULE ) 
+	MODULE_NAME        varchar(300)      ,
+	MODULE_FULL_NAME   varchar(300)      ,
+	MODULE_DESCRIPTION varchar(300)      ,
+	CONSTRAINT Unq_OM_REF_MODULES_ID_MODULE UNIQUE ( ID_MODULE )
  );
 
-CREATE TABLE OM_REF_ORDER_TYPE ( 
+CREATE TABLE OM_REF_ORDER_TYPE (
 	ID_ORDER_TYPE      int  NOT NULL,
-	ORDER_TYPE_NAME    varchar(200)      ,
-	ORDER_TYPE_VALUE   varchar(200)      ,
-	ORDER_TYPE_DESCRIPTION varchar(200)      ,
+	ORDER_TYPE_NAME    varchar(300)      ,
+	ORDER_TYPE_VALUE   varchar(300)      ,
+	ORDER_TYPE_DESCRIPTION varchar(300)      ,
 	CONSTRAINT Unq_OM_REF_ORDER_TYPE_ORDER_TYPE_NAME UNIQUE ( ORDER_TYPE_NAME ) ,
-	CONSTRAINT Unq_OM_REF_ORDER_TYPE_ORDER_TYPE_VALUE UNIQUE ( ORDER_TYPE_VALUE ) 
+	CONSTRAINT Unq_OM_REF_ORDER_TYPE_ORDER_TYPE_VALUE UNIQUE ( ORDER_TYPE_VALUE )
  );
 
-CREATE TABLE OM_REF_QUERY_TYPE ( 
+CREATE TABLE OM_REF_QUERY_TYPE (
 	ID_QUERY_TYPE      int  NOT NULL,
-	QUERY_TYPE_NAME    varchar(200)      ,
-	QUERY_TYPE_DESCRIPTION varchar(200)      ,
-	CONSTRAINT Unq_OM_REF_QUERY_TYPE_QUERY_TYPE_NAME UNIQUE ( QUERY_TYPE_NAME ) 
+	QUERY_TYPE_NAME    varchar(300)      ,
+	QUERY_TYPE_DESCRIPTION varchar(300)      ,
+	CONSTRAINT Unq_OM_REF_QUERY_TYPE_QUERY_TYPE_NAME UNIQUE ( QUERY_TYPE_NAME )
  );
 
-CREATE TABLE OM_REF_ENTITY_TYPE ( 
+CREATE TABLE OM_REF_ENTITY_TYPE (
 	ID_ENTITY_TYPE     int  NOT NULL,
-	ENTITY_TYPE_NAME   varchar(200)      ,
-	ENTITY_TYPE_DESCRIPTION varchar(200)      ,
-	ENTITY_TYPE_FULL_NAME varchar(200)      ,
+	ENTITY_TYPE_NAME   varchar(300)      ,
+	ENTITY_TYPE_DESCRIPTION varchar(300)      ,
+	ENTITY_TYPE_FULL_NAME varchar(300)      ,
 	ID_MODULE          int      ,
-	CONSTRAINT Idx_OM_REF_ENTITY_TYPE UNIQUE ( ENTITY_TYPE_NAME ) 
+	CONSTRAINT Idx_OM_REF_ENTITY_TYPE UNIQUE ( ENTITY_TYPE_NAME )
  );
 
-CREATE TABLE ENTRY_DV_ENTITY ( 
-	COD_ENTITY         varchar(200)  NOT NULL,
-	ENTITY_NAME        varchar(200)      ,
-	ENTITY_TYPE        varchar(200)      ,
-	COD_PATH           varchar(200)      ,
-	NAME_STATUS_TRACKING_SATELLITE varchar(200)      ,
-	NAME_RECORD_TRACKING_SATELLITE varchar(200)      ,
-	NAME_EFFECTIVITY_SATELLITE varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE ENTRY_DV_ENTITY (
+	COD_ENTITY         varchar(300)  NOT NULL,
+	ENTITY_NAME        varchar(300)      ,
+	ENTITY_TYPE        varchar(300)      ,
+	COD_PATH           varchar(300)      ,
+	NAME_STATUS_TRACKING_SATELLITE varchar(300)      ,
+	NAME_RECORD_TRACKING_SATELLITE varchar(300)      ,
+	NAME_EFFECTIVITY_SATELLITE varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_DV_PROPERTIES ( 
-	COD_ENTITY         varchar(200)      ,
-	NUM_CONNECTION     varchar(200)      ,
-	HASH_NAME          varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE ENTRY_DV_PROPERTIES (
+	COD_ENTITY         varchar(300)      ,
+	NUM_CONNECTION     varchar(300)      ,
+	HASH_NAME          varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_ENTITY ( 
-	COD_ENTITY         varchar(200)  NOT NULL    ,
-	TABLE_NAME         varchar(200)      ,
-	ENTITY_TYPE        varchar(200)      ,
-	COD_PATH           varchar(200)      ,
-	STRATEGY           varchar(200)      ,
-	OWNER              varchar(200)  NOT NULL    ,
-	CONSTRAINT Pk_ENTRY_DATASET_COD_ENTITY PRIMARY KEY ( COD_ENTITY, OWNER ),
-	CONSTRAINT Unq_ENTRY_ENTITY_COD_ENTITY UNIQUE ( COD_ENTITY ) 
+CREATE TABLE ENTRY_ENTITY (
+	COD_ENTITY         varchar(300)  NOT NULL    ,
+	TABLE_NAME         varchar(300)      ,
+	ENTITY_TYPE        varchar(300)      ,
+	COD_PATH           varchar(300)      ,
+	STRATEGY           varchar(300)      ,
+	OWNER              varchar(300)  NOT NULL    ,
+	CONSTRAINT Pk_ENTRY_DATASET_COD_ENTITY PRIMARY KEY ( COD_ENTITY, OWNER )
  );
 
-CREATE TABLE ENTRY_FILTERS ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	VALUE              varchar(200)      ,
+CREATE TABLE ENTRY_FILTERS (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	VALUE              varchar(300)      ,
 	NUM_BRANCH         int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_HAVING ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	VALUE              varchar(200)      ,
-	NUM_BRANCH         varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE ENTRY_HAVING (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	VALUE              varchar(300)      ,
+	NUM_BRANCH         varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_ORDER ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	COLUMN_NAME        varchar(200)      ,
-	ORDER_TYPE         varchar(200)      ,
+CREATE TABLE ENTRY_ORDER (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	COLUMN_NAME        varchar(300)      ,
+	ORDER_TYPE         varchar(300)      ,
 	NUM_BRANCH         int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_DV_ENTITY ( 
-	COD_ENTITY         varchar(200)  NOT NULL,
-	ENTITY_NAME        varchar(200)      ,
-	ENTITY_TYPE        varchar(200)      ,
-	COD_PATH           varchar(200)      ,
-	NAME_STATUS_TRACKING_SATELLITE varchar(200)      ,
-	NAME_RECORD_TRACKING_SATELLITE varchar(200)      ,
-	NAME_EFFECTIVITY_SATELLITE varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE GIT_ENTRY_DV_ENTITY (
+	COD_ENTITY         varchar(300)  NOT NULL,
+	ENTITY_NAME        varchar(300)      ,
+	ENTITY_TYPE        varchar(300)      ,
+	COD_PATH           varchar(300)      ,
+	NAME_STATUS_TRACKING_SATELLITE varchar(300)      ,
+	NAME_RECORD_TRACKING_SATELLITE varchar(300)      ,
+	NAME_EFFECTIVITY_SATELLITE varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_DV_MAPPINGS ( 
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	COLUMN_NAME_SOURCE varchar(200)      ,
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COLUMN_NAME_TARGET varchar(200)      ,
-	COLUMN_TYPE_TARGET varchar(200)      ,
-	ORDINAL_POSITION   varchar(200)      ,
+CREATE TABLE GIT_ENTRY_DV_MAPPINGS (
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	COLUMN_NAME_SOURCE varchar(300)      ,
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COLUMN_NAME_TARGET varchar(300)      ,
+	COLUMN_TYPE_TARGET varchar(300)      ,
+	ORDINAL_POSITION   int      ,
 	COLUMN_LENGTH      int      ,
 	COLUMN_PRECISION   int      ,
 	NUM_BRANCH         int      ,
 	NUM_CONNECTION     int      ,
-	KEY_TYPE           varchar(200)      ,
-	SATELLITE_NAME     varchar(200)      ,
+	KEY_TYPE           varchar(300)      ,
+	SATELLITE_NAME     varchar(300)      ,
 	ORIGIN_IS_INCREMENTAL int      ,
 	ORIGIN_IS_TOTAL    int      ,
 	ORIGIN_IS_CDC      int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_DV_PROPERTIES ( 
-	COD_ENTITY         varchar(200)      ,
-	NUM_CONNECTION     varchar(200)      ,
-	HASH_NAME          varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE GIT_ENTRY_DV_PROPERTIES (
+	COD_ENTITY         varchar(300)      ,
+	NUM_CONNECTION     varchar(300)      ,
+	HASH_NAME          varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_ENTITY ( 
-	COD_ENTITY         varchar(200)  NOT NULL    ,
-	TABLE_NAME         varchar(200)      ,
-	ENTITY_TYPE        varchar(200)      ,
-	COD_PATH           varchar(200)      ,
-	STRATEGY           varchar(200)      ,
-	OWNER              varchar(200)  NOT NULL    ,
+CREATE TABLE GIT_ENTRY_ENTITY (
+	COD_ENTITY         varchar(300)  NOT NULL    ,
+	TABLE_NAME         varchar(300)      ,
+	ENTITY_TYPE        varchar(300)      ,
+	COD_PATH           varchar(300)      ,
+	STRATEGY           varchar(300)      ,
+	OWNER              varchar(300)  NOT NULL    ,
 	CONSTRAINT Pk_ENTRY_DATASET_COD_ENTITY_0 PRIMARY KEY ( COD_ENTITY, OWNER )
  );
 
-CREATE TABLE GIT_ENTRY_FILTERS ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	VALUE              varchar(200)      ,
+CREATE TABLE GIT_ENTRY_FILTERS (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	VALUE              varchar(300)      ,
 	NUM_BRANCH         int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_HAVING ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	VALUE              varchar(200)      ,
-	NUM_BRANCH         varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE GIT_ENTRY_HAVING (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	VALUE              varchar(300)      ,
+	NUM_BRANCH         varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_ORDER ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	COLUMN_NAME        varchar(200)      ,
-	ORDER_TYPE         varchar(200)      ,
+CREATE TABLE GIT_ENTRY_ORDER (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	COLUMN_NAME        varchar(300)      ,
+	ORDER_TYPE         varchar(300)      ,
 	NUM_BRANCH         int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE OM_DATASET ( 
+CREATE TABLE OM_DATASET (
 	ID_DATASET         int  NOT NULL,
-	DATASET_NAME       varchar(200)      ,
+	DATASET_NAME       varchar(300)      ,
 	ID_ENTITY_TYPE     int      ,
 	ID_PATH            int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_EXECUTION ( 
+CREATE TABLE OM_DATASET_EXECUTION (
 	ID_DATASET         int      ,
 	ID_QUERY_TYPE      int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_SPECIFICATION ( 
+CREATE TABLE OM_DATASET_SPECIFICATION (
 	ID_DATASET_SPEC    int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_KEY_TYPE        int      ,
-	COLUMN_NAME        varchar(200)      ,
-	COLUMN_TYPE        varchar(200)      ,
+	COLUMN_NAME        varchar(300)      ,
+	COLUMN_TYPE        varchar(300)      ,
 	ORDINAL_POSITION   int      ,
 	IS_NULLABLE        int      ,
 	COLUMN_LENGTH      int      ,
 	COLUMN_PRECISION   int      ,
 	COLUMN_SCALE       int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_T_AGG ( 
+CREATE TABLE OM_DATASET_T_AGG (
 	ID_T_AGG           int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_BRANCH          int      ,
 	ID_DATASET_SPEC    int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_T_DISTINCT ( 
+CREATE TABLE OM_DATASET_T_DISTINCT (
 	ID_T_DISTINCT      int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_BRANCH          int      ,
 	SW_DISTINCT        int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_T_FILTER ( 
+CREATE TABLE OM_DATASET_T_FILTER (
 	ID_T_FILTER        int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_BRANCH          int      ,
-	VALUE_FILTER       varchar(200)      ,
-	META_OWNER         varchar(200)      ,
+	VALUE_FILTER       varchar(300)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_T_HAVING ( 
+CREATE TABLE OM_DATASET_T_HAVING (
 	ID_T_HAVING        int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_BRANCH          int      ,
-	VALUE_HAVING       varchar(200)      ,
-	META_OWNER         varchar(200)      ,
+	VALUE_HAVING       varchar(300)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_T_MAPPING ( 
+CREATE TABLE OM_DATASET_T_MAPPING (
 	ID_T_MAPPING       int  NOT NULL,
 	ID_BRANCH          int      ,
 	ID_DATASET_SPEC    int      ,
-	VALUE_MAPPING      varchar(200)      ,
-	META_OWNER         varchar(200)      ,
+	VALUE_MAPPING      varchar(300)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE OM_DATASET_T_ORDER ( 
+CREATE TABLE OM_DATASET_T_ORDER (
 	ID_T_ORDER         int  NOT NULL,
 	ID_DATASET         int      ,
 	ID_BRANCH          int      ,
 	ID_DATASET_SPEC    int      ,
 	ID_ORDER_TYPE      int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
 
-CREATE TABLE ENTRY_AGGREGATORS ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	COLUMN_NAME        varchar(200)      ,
+CREATE TABLE ENTRY_AGGREGATORS (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	COLUMN_NAME        varchar(300)      ,
 	NUM_BRANCH         int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_DATASET_MAPPINGS ( 
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	VALUE_SOURCE       varchar(200)      ,
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COLUMN_NAME_TARGET varchar(200)      ,
-	COLUMN_TYPE_TARGET varchar(200)      ,
+CREATE TABLE ENTRY_DATASET_MAPPINGS (
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	VALUE_SOURCE       varchar(300)      ,
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COLUMN_NAME_TARGET varchar(300)      ,
+	COLUMN_TYPE_TARGET varchar(300)      ,
 	ORDINAL_POSITION   int      ,
 	COLUMN_LENGTH      int      ,
 	COLUMN_PRECISION   int      ,
 	NUM_BRANCH         int      ,
-	KEY_TYPE           varchar(200)      ,
+	KEY_TYPE           varchar(300)      ,
 	SW_DISTINCT        int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_DATASET_RELATIONSHIPS ( 
-	COD_ENTITY_MASTER  varchar(200)      ,
-	COLUMN_NAME_MASTER varchar(200)      ,
-	COD_ENTITY_DETAIL  varchar(200)      ,
-	COLUMN_NAME_DETAIL varchar(200)      ,
-	RELATIONSHIP_TYPE  varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE ENTRY_DATASET_RELATIONSHIPS (
+	COD_ENTITY_MASTER  varchar(300)      ,
+	COLUMN_NAME_MASTER varchar(300)      ,
+	COD_ENTITY_DETAIL  varchar(300)      ,
+	COLUMN_NAME_DETAIL varchar(300)      ,
+	RELATIONSHIP_TYPE  varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE ENTRY_DV_MAPPINGS ( 
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	COLUMN_NAME_SOURCE varchar(200)      ,
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COLUMN_NAME_TARGET varchar(200)      ,
-	COLUMN_TYPE_TARGET varchar(200)      ,
-	ORDINAL_POSITION   varchar(200)      ,
+CREATE TABLE ENTRY_DV_MAPPINGS (
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	COLUMN_NAME_SOURCE varchar(300)      ,
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COLUMN_NAME_TARGET varchar(300)      ,
+	COLUMN_TYPE_TARGET varchar(300)      ,
+	ORDINAL_POSITION   int      ,
 	COLUMN_LENGTH      int      ,
 	COLUMN_PRECISION   int      ,
 	NUM_BRANCH         int      ,
 	NUM_CONNECTION     int      ,
-	KEY_TYPE           varchar(200)      ,
-	SATELLITE_NAME     varchar(200)      ,
+	KEY_TYPE           varchar(300)      ,
+	SATELLITE_NAME     varchar(300)      ,
 	ORIGIN_IS_INCREMENTAL int      ,
 	ORIGIN_IS_TOTAL    int      ,
 	ORIGIN_IS_CDC      int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_AGGREGATORS ( 
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	COLUMN_NAME        varchar(200)      ,
+CREATE TABLE GIT_ENTRY_AGGREGATORS (
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	COLUMN_NAME        varchar(300)      ,
 	NUM_BRANCH         int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_DATASET_MAPPINGS ( 
-	COD_ENTITY_SOURCE  varchar(200)      ,
-	VALUE_SOURCE       varchar(200)      ,
-	COD_ENTITY_TARGET  varchar(200)      ,
-	COLUMN_NAME_TARGET varchar(200)      ,
-	COLUMN_TYPE_TARGET varchar(200)      ,
+CREATE TABLE GIT_ENTRY_DATASET_MAPPINGS (
+	COD_ENTITY_SOURCE  varchar(300)      ,
+	VALUE_SOURCE       varchar(300)      ,
+	COD_ENTITY_TARGET  varchar(300)      ,
+	COLUMN_NAME_TARGET varchar(300)      ,
+	COLUMN_TYPE_TARGET varchar(300)      ,
 	ORDINAL_POSITION   int      ,
 	COLUMN_LENGTH      int      ,
 	COLUMN_PRECISION   int      ,
 	NUM_BRANCH         int      ,
-	KEY_TYPE           varchar(200)      ,
+	KEY_TYPE           varchar(300)      ,
 	SW_DISTINCT        int      ,
-	OWNER              varchar(200)      
+	OWNER              varchar(300)
  );
 
-CREATE TABLE GIT_ENTRY_DATASET_RELATIONSHIPS ( 
-	COD_ENTITY_MASTER  varchar(200)      ,
-	COLUMN_NAME_MASTER varchar(200)      ,
-	COD_ENTITY_DETAIL  varchar(200)      ,
-	COLUMN_NAME_DETAIL varchar(200)      ,
-	RELATIONSHIP_TYPE  varchar(200)      ,
-	OWNER              varchar(200)      
+CREATE TABLE GIT_ENTRY_DATASET_RELATIONSHIPS (
+	COD_ENTITY_MASTER  varchar(300)      ,
+	COLUMN_NAME_MASTER varchar(300)      ,
+	COD_ENTITY_DETAIL  varchar(300)      ,
+	COLUMN_NAME_DETAIL varchar(300)      ,
+	RELATIONSHIP_TYPE  varchar(300)      ,
+	OWNER              varchar(300)
  );
 
-CREATE TABLE OM_DATASET_RELATIONSHIPS ( 
+CREATE TABLE OM_DATASET_RELATIONSHIPS (
 	ID_RELATIONSHIP    int  NOT NULL,
 	ID_DATASET_SPEC_MASTER int      ,
 	ID_DATASET_SPEC_DETAIL int      ,
 	ID_JOIN_TYPE       int      ,
-	META_OWNER         varchar(200)      ,
+	META_OWNER         varchar(300)      ,
 	START_DATE         datetime      ,
 	END_DATE           datetime
  );
@@ -454,26 +453,26 @@ CREATE TABLE OM_DATASET_RELATIONSHIPS (
   CREATE TABLE OM_DATASET_DV (
 	ID_DATASET           int     ,
 	ID_ENTITY_TYPE       int     ,
-	META_OWNER           varchar(200)     ,
+	META_OWNER           varchar(300)     ,
 	START_DATE           datetime     ,
 	END_DATE             datetime
  );
 
 
 CREATE TABLE ENTRY_FILES (
-	COD_ENTITY           varchar(200)     ,
-	FILE_PATH            varchar(200)     ,
-	FILE_NAME            varchar(200)     ,
-	DELIMITER_CHARACTER  varchar(200)     ,
-	OWNER                varchar(200)
+	COD_ENTITY           varchar(300)     ,
+	FILE_PATH            varchar(300)     ,
+	FILE_NAME            varchar(300)     ,
+	DELIMITER_CHARACTER  varchar(300)     ,
+	OWNER                varchar(300)
  );
 
 CREATE TABLE GIT_ENTRY_FILES (
-	COD_ENTITY           varchar(200)     ,
-	FILE_PATH            varchar(200)     ,
-	FILE_NAME            varchar(200)     ,
-	DELIMITER_CHARACTER  varchar(200)     ,
-	OWNER                varchar(200)
+	COD_ENTITY           varchar(300)     ,
+	FILE_PATH            varchar(300)     ,
+	FILE_NAME            varchar(300)     ,
+	DELIMITER_CHARACTER  varchar(300)     ,
+	OWNER                varchar(300)
  );
 
 CREATE TABLE OM_DATASET_FILE (
@@ -553,9 +552,10 @@ INSERT INTO OM_REF_QUERY_TYPE(ID_QUERY_TYPE, QUERY_TYPE_NAME, QUERY_TYPE_DESCRIP
 (3, 'DELETE', 'Deletes based on the Primary Key'),
 (4, 'SELECT', 'Select the target query'),
 (5, 'MERGE', 'Select the target query'),
-(6, 'TRUNCATE AND INSERT', 'Truncate the target table and inserts');
+(6, 'TRUNCATE AND INSERT', 'Truncate the target table and inserts'),
+(7, 'DROP AND INSERT', 'Drop the target table and inserts');
 
 INSERT INTO OM_PROPERTIES(PROPERTY, VALUE, START_DATE) VALUES
-('Version', '0.4', sysdate()),
+('Version', '0.4.5.1', sysdate()),
 ('Module Deployed', 'ELT', sysdate()),
 ('Module Deployed', 'DV', sysdate());

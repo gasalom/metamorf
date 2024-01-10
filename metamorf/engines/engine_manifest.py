@@ -14,7 +14,7 @@ class EngineManifest(Engine):
         self.metadata = self.load_metadata(load_om=True, load_entry=False, load_ref=True, load_im=True, owner=self.owner)
         self.log.log(self.engine_name, "Starting the create Manifest File", LOG_LEVEL_INFO)
 
-        all_nodes = get_list_nodes_from_metadata(self.metadata, self.log, "all")
+        all_nodes = get_list_nodes_from_metadata(self.metadata, self.log)
         generate_manifest(self.metadata, self.configuration_file, all_nodes)
 
         self.log.log(self.engine_name, "Manifest File Finished", LOG_LEVEL_INFO)

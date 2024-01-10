@@ -101,14 +101,14 @@ class EngineApi(Engine):
         self.app = Flask("Metamorf API")
 
     def run(self):
-        self.start_execution(need_configuration_file=True)
+        self.start_execution()
         self.metadata = self.load_metadata(load_om=True, load_entry=False, load_ref=True, load_im=True, owner=self.owner)
-        all_nodes = get_list_nodes_from_metadata(self.metadata, self.log, "all")
-        self.manifest = generate_manifest(self.metadata, self.configuration_file, all_nodes)
+        all_nodes = get_list_nodes_from_metadata(self.metadata, self.log)
+        self.manifest = generate_manifest(self.metadata, self.configuration, all_nodes)
 
         self.log.log(self.engine_name, "Starting the API Server", LOG_LEVEL_INFO)
         self.add_endpoints()
-        self.app.run(host=self.configuration_file['api']['host'], port=self.configuration_file['api']['port'])
+        self.app.run(host=self.configuration['api']['host'], port=self.configuration['api']['port'])
 
         self.finish_execution()
 

@@ -164,8 +164,7 @@ CREATE TABLE ENTRY_ENTITY (
 	COD_PATH           text      ,
 	STRATEGY           text      ,
 	OWNER              text  NOT NULL    ,
-	PRIMARY KEY ( COD_ENTITY, OWNER ),
-	UNIQUE ( COD_ENTITY )
+	PRIMARY KEY ( COD_ENTITY, OWNER )
  );
 
 CREATE TABLE ENTRY_FILTERS ( 
@@ -208,7 +207,7 @@ CREATE TABLE GIT_ENTRY_DV_MAPPINGS (
 	COD_ENTITY_TARGET  text      ,
 	COLUMN_NAME_TARGET text      ,
 	COLUMN_TYPE_TARGET text      ,
-	ORDINAL_POSITION   text      ,
+	ORDINAL_POSITION   integer      ,
 	COLUMN_LENGTH      integer      ,
 	COLUMN_PRECISION   integer      ,
 	NUM_BRANCH         integer      ,
@@ -394,7 +393,7 @@ CREATE TABLE ENTRY_DV_MAPPINGS (
 	COD_ENTITY_TARGET  text      ,
 	COLUMN_NAME_TARGET text      ,
 	COLUMN_TYPE_TARGET text      ,
-	ORDINAL_POSITION   text      ,
+	ORDINAL_POSITION   integer      ,
 	COLUMN_LENGTH      integer      ,
 	COLUMN_PRECISION   integer      ,
 	NUM_BRANCH         integer      ,
@@ -550,9 +549,10 @@ INSERT INTO OM_REF_QUERY_TYPE(ID_QUERY_TYPE, QUERY_TYPE_NAME, QUERY_TYPE_DESCRIP
 (3, 'DELETE', 'Deletes based on the Primary Key'),
 (4, 'SELECT', 'Select the target query'),
 (5, 'MERGE', 'Select the target query'),
-(6, 'TRUNCATE AND INSERT', 'Truncate the target table and inserts');
+(6, 'TRUNCATE AND INSERT', 'Truncate the target table and inserts'),
+(7, 'DROP AND INSERT', 'Drop the target table and inserts');
 
 INSERT INTO OM_PROPERTIES(PROPERTY, VALUE, START_DATE) VALUES
-('Version', '0.4',current_timestamp ),
+('Version', '0.4.5.1',current_timestamp ),
 ('Module Deployed', 'ELT', current_timestamp),
 ('Module Deployed', 'DV', CURRENT_TIMESTAMP);

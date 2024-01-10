@@ -7,10 +7,11 @@ def print_help():
     file_controller_properties.set_file_location(os.path.join(PACKAGE_PATH, PROPERTIES_FILE_PATH), PROPERTIES_FILE_NAME)
     properties_file = file_controller_properties.read_file()
 
+    print(properties_file['logo'] + '  ' + properties_file['version'])
     print()
     print(properties_file['description'])
     print()
-    print('usage: metamorf [command] [arguments]')
+    print('usage: metamorf [command] [arguments | optional] ')
     print()
     print('commands:')
 

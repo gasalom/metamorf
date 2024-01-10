@@ -452,7 +452,7 @@ def get_all_sources_and_withs_from_dataset(metadata, dataset):
 
     return all_sources
 
-def get_list_nodes_from_metadata(metadata: Metadata, log: Log, dataset_name: str):
+def get_list_nodes_from_metadata(metadata: Metadata, log: Log):
 
     log.log("Metadata Nodes", "Start to load all the Nodes", LOG_LEVEL_INFO)
     all_nodes = []
@@ -508,7 +508,7 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
 
     # PK Columns
     pk_columns = []
-    for dataset_spec in [x for x in metadata.om_dataset_specification if x.end_date is None and x.id_dataset == dataset.id_dataset and x.id_key_type == metadata.get_key_type_from_key_type_name(KEY_TYPE_PRIMARY_KEY)]:
+    for dataset_spec in [x for x in metadata.om_dataset_specification if x.end_date is None and x.id_dataset == dataset.id_dataset and x.id_key_type == metadata.get_key_type_from_key_type_name(KEY_TYPE_PRIMARY_KEY).id_key_type]:
         pk_columns.append(metadata.get_tables_dot_column_from_id_dataset_spec(dataset_spec.id_dataset_spec))
 
     # Create table
@@ -626,8 +626,6 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
         else:
             target_table = dataset.dataset_name
 
-
-
         if num_branch == 0:
             query.set_name_query(target_table)
             query.set_target_table(target_table)
@@ -645,7 +643,6 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
             query.set_primary_key(pk_columns)
             query.set_where_filters(where_filters)
         else:
-
             query_union = Query()
             query_union.set_name_query(target_table)
             query_union.set_target_table(target_table)
@@ -663,15 +660,27 @@ def get_query_object_from_dataset(dataset: OmDataset, is_with: bool, metadata: M
             if len(select_columns) != 0:
                 query.add_unionquery(query_union)
 
-
     return query
 
-def get_node_with_with_query_execution_settings(connection, metadata, node):
+def get_node_with_with_query_execution_settings(connection, metadata, node, configuration):
     ''' Returns the node object with query execution settings configured '''
-    does_table_exists = connection.does_table_exists(node.name)
+    does_table_exists = connection.does_table_exists(node.name, connection.schema, connection.database)
     dataset = metadata.get_dataset_from_dataset_name(node.name)
     id_query_type = metadata.get_dataset_execution_from_id_dataset(dataset.id_dataset).id_query_type
     node.query.set_database(connection.get_connection_type())
+
+    if configuration['modules']['elt']['on_schema_change'] != CONFIG_ON_SCHEMA_CHANGE_IGNORE:
+        # Get all Metadata from Database
+        id_path = (metadata.get_path_from_database_and_schema(node.query.get_database_target(), node.query.get_schema_target())).id_path
+        variable_connection = connection.get_connection_type().lower() + "_database"
+        configuration_connection_data = configuration['data']
+        configuration_connection_data[variable_connection] = (metadata.get_path_from_id_path(id_path)).database_name
+        connection.setup_connection(configuration_connection_data, connection.log)
+        table_definition = connection.get_table_columns_definition(node.name)
+        all_columns = []
+        for col in table_definition:
+            all_columns.append((col.column_name, col.column_type))
+        node.query.set_columns_in_database(all_columns)
 
     if id_query_type == QUERY_TYPE_INSERT:
         node.query.set_need_create_table(not does_table_exists)
@@ -685,5 +694,34 @@ def get_node_with_with_query_execution_settings(connection, metadata, node):
         node.set_node_type(QUERY_TYPE_INSERT)
         node.query.set_need_create_table(True)
         node.query.set_is_truncate(True)
+    if does_table_exists and id_query_type == QUERY_TYPE_DROP_AND_INSERT:
+        node.set_node_type(QUERY_TYPE_INSERT)
+        node.query.set_need_create_table(True)
+        node.query.set_need_drop_table(True)
+    if not does_table_exists and id_query_type == QUERY_TYPE_DROP_AND_INSERT:
+        node.set_node_type(QUERY_TYPE_INSERT)
+        node.query.set_need_create_table(True)
+    if id_query_type == QUERY_TYPE_DELETE and does_table_exists:
+        node.set_node_type(QUERY_TYPE_DELETE)
+    if id_query_type == QUERY_TYPE_MERGE and does_table_exists:
+        node.set_node_type(QUERY_TYPE_MERGE)
+    if not does_table_exists and id_query_type == QUERY_TYPE_MERGE:
+        node.set_node_type(QUERY_TYPE_MERGE)
+        node.query.set_need_create_table(True)
+    if id_query_type == QUERY_TYPE_UPDATE and does_table_exists:
+        node.set_node_type(QUERY_TYPE_UPDATE)
+    if not does_table_exists and id_query_type == QUERY_TYPE_UPDATE:
+        node.set_node_type(QUERY_TYPE_UPDATE)
+        node.query.set_need_create_table(True)
 
     return node
+
+def is_valid_table_name(table_name):
+    if re.match('^[A-Za-z0-9_]*$', table_name):
+        return True
+    return False
+
+def is_valid_column_name(table_name):
+    if re.match('^[A-Za-z0-9_]*$', table_name):
+        return True
+    return False
