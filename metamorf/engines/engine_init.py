@@ -37,7 +37,7 @@ class EngineInit(Engine):
             self.data_database = self.metadata_database
 
     def run(self):
-        super().start_execution(need_configuration_file=False)
+        super().start_execution(need_configuration_file=False, need_connection_validation=False)
 
         # Create Configuration File
         file_controller_configuration = FileControllerFactory().get_file_reader(FILE_TYPE_YML)

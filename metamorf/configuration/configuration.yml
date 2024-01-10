@@ -1,13 +1,24 @@
-name: 'ProjectName'
-owner: 'default'
+name: ProjectName
+
+owner: default
+
 modules:
-  - name: 'elt'
-    status: 'ACTIVE'
-  - name: 'datavault'
-    status: 'ACTIVE'
-    char_separator_naming: '_'
+  - name: elt
+    status: ACTIVE
+    threads: 1
+    execution: run
+    on_schema_change: ignore
+    create_database: true
+    create_schema: true
+
+  - name: datavault
+    status: ACTIVE
+    char_separator_naming: "_"
+    hash: md5
+
 output:
-  type: 'sql'
+  type: sql
+
 api:
   port: 5555
   host: localhost

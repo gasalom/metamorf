@@ -12,8 +12,8 @@ class EngineMetadata(Engine):
     def run(self):
         super().start_execution()
 
-        self.connection = ConnectionFactory().get_connection(self.configuration_file['data']['connection_type'])
-        self.connection_metadata = ConnectionFactory().get_connection(self.configuration_file['metadata']['connection_type'])
+        self.connection = ConnectionFactory().get_connection(self.configuration['data']['connection_type'])
+        self.connection_metadata = ConnectionFactory().get_connection(self.configuration['metadata']['connection_type'])
         self.metadata_actual = self.load_metadata(load_om=True, load_entry=True, load_ref=True, load_im=False, owner=self.owner)
 
         # If there's nothing to load it finishes the execution
@@ -22,7 +22,7 @@ class EngineMetadata(Engine):
             super().finish_execution(True)
             return
 
-        metadata_validator = MetadataValidator(self.metadata_actual, self.connection, self.configuration_file, self.log)
+        metadata_validator = MetadataValidator(self.metadata_actual, self.connection, self.configuration, self.log)
         result_validation_metadata_entry = metadata_validator.validate_metadata()
         if result_validation_metadata_entry == False:
             self.log.log(self.engine_name, "Metadata Entry Validation has not passed. Please review the errors.", LOG_LEVEL_CRITICAL)

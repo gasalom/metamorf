@@ -4,34 +4,63 @@ from metamorf.constants import *
 class Query:
 
     def __init__(self):
+        # Query Type: Insert, Update, View, Delete, Merge, Select, Truncate & Insert or Values
         self.type = None
+        # Name Query: Name of the WITH clause. It's mandatory for the WITH query types
         self.name_query = ""
+        # Target Table: Name of the target table of the query
         self.target_table = ""
+        # Is With: Flag to indicate if the query object is a with query type.
         self.is_with = False
+        # Is Distinct: Flag to indicate if the query has distinct clause
         self.is_distinct = False
+        # Insert Columns: Array with all the columns that will be on the insert clause
         self.insert_columns = []
+        # Select Columns: Array with all the columns (value as column_name) that will be on the main select clause
         self.select_columns = []
+        # From Table: Tables that will be on the 'From' clause. If there are more than one, it will generate cartesian product
         self.from_tables = []
-        self.from_tables_and_relations = []  # FromRelationQuery Class
+        # From Tables and Relations: All the relations that will be on the FROM clause. All this array is made it from FromRelationQuery Objects defined on this file
+        self.from_tables_and_relations = []
+        # Group By Columns: Array with all the columns that will be on the GROUP BY clause
         self.group_by_columns = []
+        # Having Filters: Array with all the columns that will be on the HAVING clause.
         self.having_filters = []
-        self.order_by_columns = []  # OrderByQuery Class
+        # Order by Columns: Array with all the columns that will be on the ORDER BY clause. ALl the objects need to be OrderByQuery objects defined on this file.
+        self.order_by_columns = []
+        # Where Filters: Array with all the filters that will be on the WHERE clause.
         self.where_filters = []
+        # Primary Key: Array with all the columns that are defined as Primary Key
         self.primary_key = []
-        self.subqueries = []  # Query Class => With
-        self.union_query = [] # Query Class and only need to be settet as SELECT Statement, WITH statements need to be setted on the main Query.
+        # Subqueries: QUERY objects (this object type) that will be included on the WITH clause
+        self.subqueries = []
+        # Union Query: QUERY object that will be included on the UNION clause. It needs to be setted as SELECT query type. If the main query has with clause, it need to be included on the main query.
+        self.union_query = []
+        # Values: Array with all the rows that will be included on the VALUES clause. Each row doesn't need parenthesis
         self.values = []
+        # Has Header: Flag to indicate if the VALUES includes header. If it's TRUE, the first row from VALUES is skipped
         self.has_header = False
+        # Values Batch: Number of rows on VALUES clause for each INSERT. By default is 1000.
         self.values_batch = 1000 # Num of values that an insert can execute
+        # Columns and Specifications: Array with "COLUMN_NAME COLUMN_TYPE" to indicate all the specification for the target query
         self.columns_and_specs = []
+        # Database: Database Type need to be setted [Sqlite, MySql, Snowflake, Firebird, PostreSql)
         self.database = None
+        # Is Truncate: Flag to indicate if the target table needs to be truncated
         self.is_truncate = False
+        # Need Create Table: Flag to indicate if the target table needs to be created
         self.need_create_table = False
+        # Need Drop Table: Flag to indicate if the target table needs to be dropped
         self.need_drop_table = False
+        # Columns In Database: If it is indicated, the table already exists on the database and has the columns indicated on this variable. Array with "COLUMN_NAME COLUMN_TYPE]
+        self.columns_in_database = []
 
     def set_database(self, database: str):
         '''Set the Target database of the query. Use the constants CONNECTION_[X]'''
         self.database = database
+
+    def set_columns_in_database(self, columns_in_database: list):
+        self.columns_in_database = columns_in_database
 
     def set_need_create_table(self, option):
         self.need_create_table = option
@@ -83,10 +112,22 @@ class Query:
             from_tables = [from_tables]
         self.from_tables = from_tables
 
+    def add_from_tables(self, from_tables: list):
+        if isinstance(from_tables, str):
+            from_tables = [from_tables]
+        for x in from_tables:
+            self.from_tables.append(x)
+
     def set_from_tables_and_relations(self, from_tables_and_relations: list):
         for from_table in from_tables_and_relations:
             if not isinstance(from_table, FromRelationQuery): raise TypeError("FromRelationQuery must be set to an FromRelationQuery Object")
         self.from_tables_and_relations = from_tables_and_relations
+
+    def add_from_tables_and_relations(self, from_tables_and_relations: list):
+        for from_table in from_tables_and_relations:
+            if not isinstance(from_table, FromRelationQuery): raise TypeError("FromRelationQuery must be set to an FromRelationQuery Object")
+        for x in from_tables_and_relations:
+            self.from_tables_and_relations.append(x)
 
     def set_group_by_columns(self, group_by_columns: list):
         self.group_by_columns = group_by_columns
@@ -138,7 +179,22 @@ class Query:
         for x in query.from_tables_and_relations:
             if x.master_table not in all_from_tables: all_from_tables.append(x.master_table)
             if x.detail_table not in all_from_tables: all_from_tables.append(x.detail_table)
+
+        for union_query in query.union_query:
+            for x in union_query.from_tables:
+                if x not in all_from_tables: all_from_tables.append(x)
+            for x in union_query.from_tables_and_relations:
+                if x.master_table not in all_from_tables: all_from_tables.append(x.master_table)
+                if x.detail_table not in all_from_tables: all_from_tables.append(x.detail_table)
+
         return all_from_tables
+
+    def get_database_target(self):
+        return self.name_query.split('.')[0]
+
+    def get_schema_target(self):
+        if self.database == CONNECTION_SQLITE: return None
+        return self.name_query.split('.')[1]
 
     def __str__(self):
         query = ""
@@ -193,9 +249,8 @@ class Query:
 
         if len(self.from_tables) > 0: all_from_tables += ","
         includedTables = []
-        all_relation_to_include = self.from_tables_and_relations
+        all_relation_to_include = self.from_tables_and_relations.copy()
         pos = 0
-
         while len(all_relation_to_include) > 0:
             relation = all_relation_to_include[pos]
             if not includedTables: # If it's the first relation, we include it
@@ -262,7 +317,6 @@ class Query:
                     pos = 0
                     continue
             pos += 1
-
         # delete \n
         all_from_tables = all_from_tables[:-1]
 
@@ -307,15 +361,34 @@ class Query:
             values_list.append(all_values)
 
         #######################################################################################
-        if self.need_drop_table:
-            query += "DROP TABLE " + self.target_table + ";\n\n"
+        if self.need_drop_table: query += "DROP TABLE " + self.target_table + ";\n\n"
 
         if self.need_create_table:
             query += "CREATE TABLE "+ self.target_table +" (\n"
             for col in self.columns_and_specs:
                 query += col + ",\n"
-            query = query[:-2]
+
+            if len(self.primary_key)>0:
+                query += "PRIMARY KEY ("
+                for pk in self.primary_key:
+                    query += pk.split('.')[1] + ','
+                query = query[:-1]
+                query += ")"
+            else:
+                query = query[:-2]
             query+=");\n\n"
+
+        if len(self.columns_in_database)>0 and self.need_drop_table is False and self.need_create_table is False:
+            for col_metadata in self.columns_and_specs:
+                is_found = False
+                for col_database in self.columns_in_database:
+                    if col_metadata.split(' ')[0] == col_database[0]:
+                        is_found = True
+                        break
+                if is_found:
+                    continue
+                else:
+                    query += "ALTER TABLE " + self.name_query + " ADD COLUMN " + col_metadata + ";\n"
 
         if self.is_truncate:
             if self.database.upper() == CONNECTION_SQLITE.upper():
@@ -366,6 +439,7 @@ class Query:
             if len(self.values) <= 1 and self.has_header: query = ""
             if len(values_list)==0: query = ""
 
+            # In case there is no data to load, and DROP TABLE is setted to TRUE => all the data is deleted
             if (len(self.values) <= 1 and self.has_header) or len(values_list)==0:
                 if self.need_drop_table:
                     if self.database.upper() == CONNECTION_SQLITE.upper():
@@ -373,7 +447,7 @@ class Query:
                     else:
                         query += "TRUNCATE TABLE " + self.target_table + ";\n\n"
 
-        if self.type == QUERY_TYPE_DELETE:
+        if self.type == QUERY_TYPE_DELETE and len(self.primary_key)==0 and len(self.select_columns) == 0:
             where = ""
             if len(self.where_filters)>1:
                 for where_filter in self.where_filters:
@@ -383,8 +457,477 @@ class Query:
                 where = self.where_filters[0]
             query += "DELETE FROM " + self.target_table + " WHERE " + where
 
+        if self.type == QUERY_TYPE_DELETE and len(self.primary_key)>0 and len(self.select_columns)>0:
+
+            if self.database.upper() == CONNECTION_SQLITE.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "DELETE FROM "+ self.target_table +"\n"
+                query += "WHERE EXISTS \n"
+                query += "(select * from " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP WHERE \n"
+                for pk in self.primary_key:
+                    query += self.target_table +"."+pk.split('.')[1] + "=" +self.get_dataset_name_from_fqdn(self.target_table) + "__TMP."+pk.split('.')[1] +" AND\n"
+                query = query[:-4]
+                query += ")"
+
+            if self.database.upper() == CONNECTION_MYSQL.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "DELETE FROM "+ self.target_table +"\n"
+                query += "USING "+ self.target_table +"\n"
+                query += "JOIN " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP ON \n"
+                for pk in self.primary_key:
+                    query += self.target_table +"."+pk.split('.')[1] + "=" +self.get_dataset_name_from_fqdn(self.target_table) + "__TMP."+pk.split('.')[1] +" AND\n"
+                query = query[:-4]
+
+            if self.database.upper() == CONNECTION_SNOWFLAKE.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries+
+                with_clause_string = ""
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    with_clause_string += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: with_clause_string = with_clause_string[:-2] + "\n"
+
+                query += "DELETE FROM "+ self.target_table +"\n"
+                query += "WHERE USING ( \n" + with_clause_string + " select * From " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP ) as " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP \n"
+                query += " WHERE \n"
+                for pk in self.primary_key:
+                    query += self.target_table +"."+pk.split('.')[1] + "=" +self.get_dataset_name_from_fqdn(self.target_table) + "__TMP."+pk.split('.')[1] +" AND\n"
+                query = query[:-4]
+
+            if self.database.upper() == CONNECTION_POSTGRESQL.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "DELETE FROM "+ self.target_table +" " + self.get_dataset_name_from_fqdn(self.target_table) + "\n"
+                query += "WHERE  \n"
+                for pk in self.primary_key:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) + "." + pk.split('.')[1] +','
+                query = query[:-1]
+                query += ' in \n'
+                query += "(select "
+                for pk in self.primary_key:
+                    query += pk.split('.')[1] +','
+                    query = query[:-1]
+                query +=" from " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP )"
+
         if self.type == QUERY_TYPE_UPDATE:
-            raise ValueError("QUERY UPDATE not implemented yet")
+
+            if self.database.upper() == CONNECTION_SQLITE.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "UPDATE "+ self.target_table + " AS " + self.get_dataset_name_from_fqdn(self.target_table) +"\n"
+                query += "SET (\n"
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += col + ",\n"
+                query = query[:-2] +"\n)\n = (\n"
+                query += "SELECT "
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += self.get_dataset_name_from_fqdn(self.target_table) +"__TMP."+ col+ ",\n"
+                query = query[:-2] +"\n"
+                query += "FROM " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP WHERE "
+                for pk in self.primary_key:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) +"."+pk.split('.')[1] + "=" +self.get_dataset_name_from_fqdn(self.target_table) + "__TMP."+pk.split('.')[1] +" AND\n"
+                query = query[:-4] +")\n"
+                query += "WHERE ("
+                for pk in self.primary_key:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) +"."+pk.split('.')[1] +","
+                query = query[:-1] + ")"
+                query += " IN (select "
+                for pk in self.primary_key:
+                    query += pk.split('.')[1] +","
+                query = query[:-1]
+                query += " FROM " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP )"
+
+            if self.database.upper() == CONNECTION_MYSQL.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "UPDATE "+ self.target_table + " " + self.get_dataset_name_from_fqdn(self.target_table) +"\n"
+
+                query += "INNER JOIN " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP ON "
+                for pk in self.primary_key:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) + "." + pk.split('.')[1] + "=" + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP." + pk.split('.')[1] + " AND\n"
+                query = query[:-4] + "\n"
+
+                query += "SET \n"
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += self.get_dataset_name_from_fqdn(self.target_table) +"." + col + "=" + self.get_dataset_name_from_fqdn(self.target_table) +"__TMP." + col +",\n"
+                query = query[:-2] +"\n"
+
+            if self.database.upper() == CONNECTION_POSTGRESQL.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0,new_query) # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "UPDATE "+ self.target_table + " AS " + self.get_dataset_name_from_fqdn(self.target_table) +"\n"
+                query += "SET (\n"
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += col + ",\n"
+                query = query[:-2] +"\n)\n = (\n"
+                query += "SELECT "
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += self.get_dataset_name_from_fqdn(self.target_table) +"__TMP."+ col+ ",\n"
+                query = query[:-2] +"\n"
+                query += "FROM " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP WHERE "
+                for pk in self.primary_key:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) +"."+pk.split('.')[1] + "=" +self.get_dataset_name_from_fqdn(self.target_table) + "__TMP."+pk.split('.')[1] +" AND\n"
+                query = query[:-4] +")\n"
+                query += "WHERE ("
+                for pk in self.primary_key:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) +"."+pk.split('.')[1] +","
+                query = query[:-1] + ")"
+                query += " IN (select "
+                for pk in self.primary_key:
+                    query += pk.split('.')[1] +","
+                query = query[:-1]
+                query += " FROM " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP )"
+
+            if self.database.upper() == CONNECTION_SNOWFLAKE.upper():
+                raise ValueError("UPDATE Snowflake not developped")
+
+        if self.type == QUERY_TYPE_MERGE:
+
+            if self.database.upper() == CONNECTION_SQLITE.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0, new_query)  # Add the main select to the last WITH clause
+
+                query += "INSERT INTO " + self.target_table + "(" + all_insert_columns + ")\n"
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "SELECT " + ','.join([str(col) for col in self.insert_columns]) + " FROM "+ self.get_dataset_name_from_fqdn(self.target_table) + "__TMP" + " WHERE TRUE "
+                query += "ON CONFLICT ("
+                for pk in self.primary_key:
+                    query += pk + ","
+                query = query[:-1]
+                query += ") DO UPDATE SET "
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += col + "=excluded." + col + ", "
+                query = query[:-2]
+
+            if self.database.upper() == CONNECTION_SNOWFLAKE.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0, new_query)  # Add the main select to the last WITH clause
+
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+
+                query += "MERGE INTO " + self.target_table + " TARGET_TABLE\nUSING ("
+
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+                query += " select * From " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP\n) TMP_TABLE\nON"
+
+                for pk in self.primary_key:
+                    query += "TARGET_TABLE." + pk + " = TMP_TABLE." + pk +" AND\n"
+                query = query[:-5]
+                query += "\nWHEN MATCHED THEN UPDATE SET\n"
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += "TARGET_TABLE." + col + " = TMP_TABLE."+ col + " and\n "
+                query = query[:-5]
+                query += "\nWHEN NOT MATCHED THEN INSERT("+all_insert_columns+") VALUES (" + all_insert_columns + ")"
+
+            if self.database.upper() == CONNECTION_MYSQL.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0, new_query)  # Add the main select to the last WITH clause
+
+                query += "INSERT INTO " + self.target_table +"(" + all_insert_columns +")\n"
+
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+                if len(self.subqueries) > 0: query = query[:-2] + "\n"
+                query += "SELECT "+all_insert_columns+"\nFROM " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP\n"
+                query += "ON DUPLICATE KEY UPDATE\n"
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += self.target_table + "." + col + " = " + self.get_dataset_name_from_fqdn(self.target_table) +"__TMP."+ col + ",\n"
+                query = query[:-2]
+
+            if self.database.upper() == CONNECTION_POSTGRESQL.upper():
+                new_query = Query()
+                new_query.set_name_query(self.get_dataset_name_from_fqdn(self.target_table) + "__TMP")
+                new_query.set_target_table(self.target_table)
+                new_query.set_columns_and_specs(self.columns_and_specs)
+                new_query.set_is_with(True)
+                new_query.set_type(QUERY_TYPE_SELECT)
+                new_query.set_select_columns(self.select_columns)
+                new_query.set_from_tables(self.from_tables)
+                new_query.set_is_distinct(self.is_distinct)
+                new_query.set_from_tables_and_relations(self.from_tables_and_relations)
+                new_query.set_insert_columns(self.insert_columns)
+                new_query.set_order_by_columns(self.order_by_columns)
+                new_query.set_having_filters(self.having_filters)
+                new_query.set_group_by_columns(self.group_by_columns)
+                new_query.set_primary_key(self.primary_key)
+                new_query.set_where_filters(self.where_filters)
+                self.subqueries.insert(0, new_query)  # Add the main select to the last WITH clause
+
+                # Add all WITH subqueries: it deletes with clause if there are more than 2 subqueries
+                firstTime = True
+                for subquery in self.subqueries[::-1]:
+                    if not firstTime:
+                        subquery = str(subquery)[5:]
+                    firstTime = False
+                    query += str(subquery) + ",\n"
+
+                query += "updated AS (\n"
+                query += "UPDATE " +  self.target_table  + " AS "+ self.get_dataset_name_from_fqdn(self.target_table) + " SET \n"
+                for col in self.insert_columns:
+                    if col not in [x.split('.')[1] for x in self.primary_key]:
+                        query += col + "=" + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP." + col + ",\n"
+                query = query[:-2]
+                query += "\nFROM " + self.get_dataset_name_from_fqdn(self.target_table) + "__TMP\nWHERE\n"
+                for pk in [x.split('.')[1] for x in self.primary_key]:
+                    query += self.get_dataset_name_from_fqdn(self.target_table) +"."+pk + "="+self.get_dataset_name_from_fqdn(self.target_table) + "__TMP."+pk +" AND\n"
+                query = query[:-5]
+                query += "\nRETURNING " + self.get_dataset_name_from_fqdn(self.target_table) + ".*\n)\n"
+                query +="INSERT INTO " + self.target_table + "\nSELECT * FROM " +  self.get_dataset_name_from_fqdn(self.target_table) + "__TMP\n"
+                query += "WHERE ("
+                all_primary_key = ""
+                for pk in [x.split('.')[1] for x in self.primary_key]:
+                    all_primary_key += pk+","
+                all_primary_key = all_primary_key[:-1]
+                query += all_primary_key + ") NOT IN (SELECT " + all_primary_key + " FROM updated)"
 
 
 

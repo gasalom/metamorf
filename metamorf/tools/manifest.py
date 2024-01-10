@@ -18,19 +18,6 @@ def generate_manifest(metadata, configuration, all_nodes):
     manifest_metadata['data_database'] = configuration['data']['connection_type']
     manifest_metadata['project_name'] = configuration['name']
 
-    modules = dict()
-    modules_elt = dict()
-    modules_dv = dict()
-    for module in configuration['modules']:
-        if module['name'] == 'elt':
-            modules_elt['status'] = module['status']
-        if module['name'] == 'datavault':
-            modules_dv['status'] = module['status']
-            modules_dv['char_separator_naming'] = module['char_separator_naming']
-
-    modules['elt'] = modules_elt
-    modules['datavault'] = modules_dv
-
     data_database = configuration['data']
     metadata_database = configuration['metadata']
 
@@ -89,7 +76,6 @@ def generate_manifest(metadata, configuration, all_nodes):
         datasets.append(d)
 
     manifest['metadata'] = manifest_metadata
-    manifest['modules'] = modules
     manifest['data_database'] = data_database
     manifest['metadata_database'] = metadata_database
     manifest['nodes'] = nodes

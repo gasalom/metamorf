@@ -14,16 +14,16 @@ class EngineValidate(Engine):
         super().start_execution()
 
         self.log.log(self.engine_name, "Starting to validate metadata connection", LOG_LEVEL_INFO)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         connection = ConnectionFactory().get_connection(connection_type)
-        connection.setup_connection(self.configuration_file['metadata'], self.log)
+        result = connection.setup_connection(self.configuration['metadata'], self.log)
         self.log.log(self.engine_name, "Metadata connection validation finished", LOG_LEVEL_INFO)
 
         self.log.log(self.engine_name, "Starting to validate data connection", LOG_LEVEL_INFO)
-        connection_type = self.configuration_file['data']['connection_type']
+        connection_type = self.configuration['data']['connection_type']
         connection = ConnectionFactory().get_connection(connection_type)
-        connection.setup_connection(self.configuration_file['data'], self.log)
+        result = result & connection.setup_connection(self.configuration['data'], self.log)
         self.log.log(self.engine_name, "Data connection validation finished", LOG_LEVEL_INFO)
 
 
-        super().finish_execution()
+        super().finish_execution(result)

@@ -15,9 +15,9 @@ class EngineCommit(Engine):
         super().start_execution()
 
         self.log.log(self.engine_name, "Starting to commit metadata from owner ["+self.owner+"]", LOG_LEVEL_INFO)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         self.connection = ConnectionFactory().get_connection(connection_type)
-        self.connection.setup_connection(self.configuration_file['metadata'], self.log)
+        self.connection.setup_connection(self.configuration['metadata'], self.log)
 
         self.delete_metadata_git()
         self.copy_metadata_git()
@@ -32,7 +32,7 @@ class EngineCommit(Engine):
         self.log.log(self.engine_name, "Starting to delete previous metadata version", LOG_LEVEL_INFO)
 
         where_filter = COLUMN_GIT_ENTRY_OWNER+"='"+self.owner+"'"
-        connection_type = (self.configuration_file['metadata']['connection_type']).upper()
+        connection_type = (self.configuration['metadata']['connection_type']).upper()
 
         # GIT_ENTRY_PATH
         query = Query()
@@ -135,7 +135,7 @@ class EngineCommit(Engine):
     def copy_metadata_git(self):
         self.log.log(self.engine_name, "Starting to load active metadata version", LOG_LEVEL_INFO)
         where_filter = COLUMN_ENTRY_OWNER + "='" + self.owner + "'"
-        connection_type = (self.configuration_file['metadata']['connection_type']).upper()
+        connection_type = (self.configuration['metadata']['connection_type']).upper()
 
         # GIT_ENTRY_PATH
         query = Query()

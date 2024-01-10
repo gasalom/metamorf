@@ -6,14 +6,25 @@ import os
 class Log:
 
     def __init__(self):
+        file_controller_properties = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
+        file_controller_properties.set_file_location(os.path.join(PACKAGE_PATH, PROPERTIES_FILE_PATH), PROPERTIES_FILE_NAME)
+        self.properties_file = file_controller_properties.read_file()
+
         os.system('')
         self.file_log = FileControllerFactory().get_file_reader(FILE_TYPE_LOG)
         self.file_log.set_file_location(ACTUAL_PATH, LOG_FILE_NAME)
         self.file_log.setup_writer(FILE_WRITER_APPEND)
 
-        file_controller_properties = FileControllerFactory().get_file_reader(FILE_TYPE_YML)
-        file_controller_properties.set_file_location(os.path.join(PACKAGE_PATH, PROPERTIES_FILE_PATH), PROPERTIES_FILE_NAME)
-        self.properties_file = file_controller_properties.read_file()
+        actual_size_log_file = os.stat(self.file_log.final_path).st_size / (1024*1024)
+        if 'options' not in self.properties_file: return
+        if 'max_size_mega_bytes_log_file' not in self.properties_file['options']: return
+        if actual_size_log_file > self.properties_file['options']['max_size_mega_bytes_log_file']:
+            self.file_log.close()
+            os.rename(self.file_log.final_path, self.file_log.final_path+"."+datetime.now().strftime("%Y%m%d%H%M%S"))
+            self.file_log = FileControllerFactory().get_file_reader(FILE_TYPE_LOG)
+            self.file_log.set_file_location(ACTUAL_PATH, LOG_FILE_NAME)
+            self.file_log.setup_writer(FILE_WRITER_APPEND)
+
 
     def log(self, subject: str, message: str, level: int):
         date_now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

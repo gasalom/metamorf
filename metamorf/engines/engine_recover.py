@@ -52,9 +52,9 @@ class EngineRecover(Engine):
         super().start_execution()
 
         self.log.log(self.engine_name, "Starting to commit metadata from owner ["+self.owner+"]", LOG_LEVEL_INFO)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         self.connection = ConnectionFactory().get_connection(connection_type)
-        self.connection.setup_connection(self.configuration_file['metadata'], self.log)
+        self.connection.setup_connection(self.configuration['metadata'], self.log)
 
         self.delete_metadata_entry()
         self.copy_metadata_git()
@@ -69,7 +69,7 @@ class EngineRecover(Engine):
         self.log.log(self.engine_name, "Starting to delete actual metadata", LOG_LEVEL_INFO)
 
         where_filter = COLUMN_ENTRY_OWNER+"='"+self.owner+"'"
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
 
         # ENTRY_PATH
         if TABLE_ENTRY_PATH in self.tables_to_load:
@@ -184,7 +184,7 @@ class EngineRecover(Engine):
     def copy_metadata_git(self):
         self.log.log(self.engine_name, "Starting to load backup metadata", LOG_LEVEL_INFO)
         where_filter = COLUMN_GIT_ENTRY_OWNER + "='" + self.owner + "'"
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
 
         # GIT_ENTRY_PATH
         if TABLE_ENTRY_PATH in self.tables_to_load:

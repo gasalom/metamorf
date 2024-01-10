@@ -16,27 +16,27 @@ class EngineOutput(Engine):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
         super().start_execution()
 
-        output_type = self.configuration_file['output']['type']
+        output_type = self.configuration['output']['type']
 
         self.metadata = self.load_metadata(load_om=True, load_ref=True, load_entry=False, load_im=False, owner=self.owner)
 
-        all_nodes = get_list_nodes_from_metadata(self.metadata, self.log, "all")
+        all_nodes = get_list_nodes_from_metadata(self.metadata, self.log)
 
         self.log.log(self.engine_name, "Start to Generate Files with [" + output_type + "] configuration", LOG_LEVEL_INFO)
 
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         connection = ConnectionFactory().get_connection(connection_type)
 
         for node in all_nodes:
 
             path = self.metadata.get_path_from_dataset_name(node.name)
-            configuration = self.configuration_file['data']
+            configuration = self.configuration['data']
             configuration[connection_type + "_database"] = path.database_name
             configuration[connection_type + "_schema"] = path.schema_name
             connection.setup_connection(configuration, self.log)
 
             # Select Strategy of Materialization
-            if output_type.upper() == OUTPUT_TYPE_DBT.upper():
+            if output_type.upper() == CONFIG_OUTPUT_TYPE_DBT.upper():
                 node.query.set_type(QUERY_TYPE_SELECT)
                 content = str(node.query)
                 content = self.dbt_create_config_for_models(node) + "\n\n" + content
@@ -54,7 +54,7 @@ class EngineOutput(Engine):
                         content = re.sub("\s+" + fqdn + "\s|\r+", " {{ref('" + table + "')}} ", content)
 
             else:
-                node = get_node_with_with_query_execution_settings(connection, self.metadata, node)
+                node = get_node_with_with_query_execution_settings(connection, self.metadata, node, self.configuration)
                 content = str(node.query)
 
 
@@ -65,7 +65,7 @@ class EngineOutput(Engine):
 
 
         # Create source files for DBT
-        if output_type.upper() == OUTPUT_TYPE_DBT.upper():
+        if output_type.upper() == CONFIG_OUTPUT_TYPE_DBT.upper():
             self.dbt_create_source_yml()
 
         self.log.log(self.engine_name, "Finish Generate Files", LOG_LEVEL_INFO)
@@ -137,11 +137,13 @@ class EngineOutput(Engine):
     def dbt_create_config_for_models(self, node):
         id_query_type = self.metadata.get_dataset_execution_from_id_dataset(self.metadata.get_dataset_from_dataset_name(node.name).id_dataset).id_query_type
         config = "{{ config(materialized='"
-        #TODO: Add more options to config DBT
-        if id_query_type == QUERY_TYPE_TRUNCATE_AND_INSERT: config += "table"
-        if id_query_type == QUERY_TYPE_INSERT or id_query_type == QUERY_TYPE_UPDATE: config += "incremental'"
+        if id_query_type == QUERY_TYPE_DELETE:
+            self.log.log(self.engine_name, "Can't generate DELETE models for dbt. [DELETE] strategies are replaced by [TRUNCATE AND INSERT]", LOG_LEVEL_WARNING)
+            id_query_type = QUERY_TYPE_TRUNCATE_AND_INSERT
+        if id_query_type == QUERY_TYPE_TRUNCATE_AND_INSERT or id_query_type == QUERY_TYPE_DROP_AND_INSERT: config += "table'"
+        if id_query_type == QUERY_TYPE_INSERT: config += "incremental'"
         if id_query_type == QUERY_TYPE_VIEW: config += "view'"
-        if id_query_type == QUERY_TYPE_MERGE:
+        if id_query_type == QUERY_TYPE_MERGE or id_query_type == QUERY_TYPE_UPDATE:
             all_pk = []
             dataset_id = self.metadata.get_dataset_from_dataset_name(node.name).id_dataset
             for dataset_spec in self.metadata.om_dataset_specification:

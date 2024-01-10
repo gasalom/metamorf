@@ -49,9 +49,9 @@ class EngineUpload(Engine):
     def run(self):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
         super().start_execution()
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         self.connection = ConnectionFactory().get_connection(connection_type)
-        self.connection.setup_connection(self.configuration_file['metadata'], self.log)
+        self.connection.setup_connection(self.configuration['metadata'], self.log)
 
         result_delete = self.delete_all_entry_from_owner()
         if not result_delete:
@@ -66,7 +66,7 @@ class EngineUpload(Engine):
     def delete_all_entry_from_owner(self):
         result = True
         self.log.log(self.engine_name, "Starting deleting Metadata Entry on database" , LOG_LEVEL_INFO)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         for file in self.entry_files_to_load:
             self.log.log(self.engine_name, "Deleting: " + file, LOG_LEVEL_INFO)
             query = Query()
@@ -83,7 +83,7 @@ class EngineUpload(Engine):
         result = []
         for f in file:
             s = f
-            s.append(self.configuration_file['owner'])
+            s.append(self.configuration['owner'])
             result.append(s)
         return result
 
@@ -91,7 +91,7 @@ class EngineUpload(Engine):
         self.log.log(self.engine_name, "Starting uploading Metadata Entry on database", LOG_LEVEL_INFO)
         result = True
         metadata = Metadata(self.log)
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
 
         # ENTRY_AGGREGATORS
         if FILE_ENTRY_AGGREGATORS in self.entry_files_to_load:

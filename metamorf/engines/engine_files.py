@@ -17,10 +17,10 @@ class EngineFiles(Engine):
     def run(self):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
         super().start_execution()
-        self.connection_type = self.configuration_file['data']['connection_type']
-        self.connection_data = ConnectionFactory().get_connection(self.configuration_file['data']['connection_type'])
-        self.connection_metadata = ConnectionFactory().get_connection(self.configuration_file['metadata']['connection_type'])
-        self.connection_metadata.setup_connection(self.configuration_file['metadata'], self.log)
+        self.connection_type = self.configuration['data']['connection_type']
+        self.connection_data = ConnectionFactory().get_connection(self.configuration['data']['connection_type'])
+        self.connection_metadata = ConnectionFactory().get_connection(self.configuration['metadata']['connection_type'])
+        self.connection_metadata.setup_connection(self.configuration['metadata'], self.log)
         self.metadata_actual = self.load_metadata(load_om=False, load_entry=True, load_ref=False, load_im=False, owner=self.owner)
         self.metadata_to_load = Metadata(self.log)
 
@@ -39,7 +39,7 @@ class EngineFiles(Engine):
 
             path_entity = self.metadata_actual.get_entry_path_from_cod_path(entry_entity.cod_path)
             # Prepare connection path
-            new_connection = self.connection_data.get_configuarion_of_connection_on_path(self.configuration_file['data'], path_entity.database_name, path_entity.schema_name)
+            new_connection = self.connection_data.get_configuarion_of_connection_on_path(self.configuration['data'], path_entity.database_name, path_entity.schema_name)
             self.connection_data.setup_connection(new_connection, self.log)
 
             file_reader = FileControllerFactory().get_file_reader(FILE_TYPE_CSV)
@@ -75,7 +75,7 @@ class EngineFiles(Engine):
                 new_column = r + " " + self.connection_data.get_string_for_metadata()[0]
                 columns_and_specs.append(new_column)
 
-            table_exists = self.connection_data.does_table_exists(entry_entity.table_name)
+            table_exists = self.connection_data.does_table_exists(entry_entity.table_name, path_entity.schema_name, path_entity.database_name)
 
             query_values = Query()
             query_values.set_need_drop_table(table_exists)

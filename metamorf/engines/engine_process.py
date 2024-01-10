@@ -13,23 +13,36 @@ class EngineProcess(Engine):
         self.engine_command = "process"
         self.module_elt_active = False
         self.module_dv_active = False
-        self.module_dv_char_separator_naming = "_"
 
     def run(self):
         # Starts the execution loading the Configuration File. If there is an error it finishes the execution.
         super().start_execution()
 
-        if len(self.modules_to_execute) == 0:
+        if len(self.configuration['active_modules']) == 0:
             self.log.log(self.engine_name, "No Modules are Active - No metadata will be processed", LOG_LEVEL_WARNING)
             super().finish_execution(False)
             return
 
-        self.connection = ConnectionFactory().get_connection(self.configuration_file['data']['connection_type'])
-        self.connection_metadata = ConnectionFactory().get_connection(self.configuration_file['metadata']['connection_type'])
+        self.connection = ConnectionFactory().get_connection(self.configuration['data']['connection_type'])
+        self.connection_metadata = ConnectionFactory().get_connection(self.configuration['metadata']['connection_type'])
         self.metadata_actual = self.load_metadata(load_om=True, load_entry=True, load_ref=True, load_im=False, owner=self.owner)
         self.metadata_to_load = Metadata(self.log)
 
-        metadata_validator = MetadataValidator(self.metadata_actual, self.connection, self.configuration_file, self.log)
+        # Get Hash Function - indicated on the configuration file
+        # Get Hash Information
+        if self.configuration['modules']['datavault']['hash'] == CONFIG_HASH_DV_MD5:
+            self.hash_datavault_function = self.connection.get_md5_function()[0]
+            self.hash_for_metadata = self.connection.get_md5_function()[1]
+        elif self.configuration['modules']['datavault']['hash'] == CONFIG_HASH_DV_SHA256:
+            self.hash_datavault_function = self.connection.get_sha256_function()[0]
+            self.hash_for_metadata = self.connection.get_sha256_function()[1]
+        else:
+            self.hash_datavault_function = self.connection.get_md5_function()[0]
+            self.hash_for_metadata = self.connection.get_md5_function()[1]
+
+
+
+        metadata_validator = MetadataValidator(self.metadata_actual, self.connection, self.configuration, self.log)
         result_validation_metadata_entry = metadata_validator.validate_metadata()
         if result_validation_metadata_entry == False:
             self.log.log(self.engine_name, "Metadata Entry Validation has not passed. Please review the errors.", LOG_LEVEL_CRITICAL)
@@ -45,11 +58,11 @@ class EngineProcess(Engine):
         self.get_next_ids()
 
         # Process Metadata and get new Metadata to update database
-        if MODULE_DV in self.modules_to_execute or MODULE_ELT in self.modules_to_execute: self.process_common()
+        if MODULE_DV in self.configuration['active_modules'] or MODULE_ELT in self.configuration['active_modules']: self.process_common()
 
-        if MODULE_DV in self.modules_to_execute: self.process_dv()
-        if MODULE_ELT in self.modules_to_execute: self.process_elt()
-        if MODULE_DV in self.modules_to_execute: self.process_dv_final()
+        if MODULE_DV in self.configuration['active_modules']: self.process_dv()
+        if MODULE_ELT in self.configuration['active_modules']: self.process_elt()
+        if MODULE_DV in self.configuration['active_modules']: self.process_dv_final()
 
 
         self.log.log(self.engine_name, "Starting to process Historical Metadata from ELT Module", LOG_LEVEL_INFO)
@@ -67,8 +80,8 @@ class EngineProcess(Engine):
 
     def get_next_ids(self):
         self.log.log(self.engine_name, "Starting to get id's from database", LOG_LEVEL_ONLY_LOG)
-        connection = ConnectionFactory().get_connection(self.configuration_file['metadata']['connection_type'])
-        connection.setup_connection(self.configuration_file['metadata'], self.log)
+        connection = ConnectionFactory().get_connection(self.configuration['metadata']['connection_type'])
+        connection.setup_connection(self.configuration['metadata'], self.log)
 
         # DATASET
         query = Query()
@@ -270,30 +283,31 @@ class EngineProcess(Engine):
         entry_dv_mapping_bk = self.metadata_actual.get_all_bk_from_entry_dv_cod_entity_target_and_num_branch(hub, num_branch)
         entry_dv_mapping_bk.sort(key=lambda x: x.ordinal_position)
 
-        md5_function = self.connection.get_md5_function()
+        md5_function = self.hash_datavault_function
 
         cast_to_string = self.connection.get_cast_string_for_metadata()
 
         bk_concatenate = ''
         for bk in entry_dv_mapping_bk:
-            bk_final = cast_to_string.replace('[x]', self.connection.get_if_is_null().replace('[x]', bk.column_name_source))
-            bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
-        bk_concatenate = bk_concatenate[:-(len(self.module_dv_char_separator_naming) + 6)]
+            #bk_final = cast_to_string.replace('[x]', self.connection.get_if_is_null().replace('[x]', bk.column_name_source))
+            bk_final = self.connection.get_if_is_null().replace('[x]', cast_to_string.replace('[x]', bk.column_name_source))
+            bk_concatenate += bk_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
+        bk_concatenate = bk_concatenate[:-(len(self.configuration['modules']['datavault']['char_separator_naming']) + 6)]
 
         tenant_concatenate = ''
         for tn in tenant_source:
             tn_final = cast_to_string.replace('[x]', tn.column_name_source)
-            tenant_concatenate += tn_final + "||'" + self.module_dv_char_separator_naming + "'||"
-        tenant_concatenate = tenant_concatenate[:-(len(self.module_dv_char_separator_naming) + 6)]
+            tenant_concatenate += tn_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
+        tenant_concatenate = tenant_concatenate[:-(len(self.configuration['modules']['datavault']['char_separator_naming']) + 6)]
 
         seq_concatenate = ''
         for seq in seq_source:
             seq_final=cast_to_string.replace('[x]', seq.column_name_source)
-            seq_concatenate+=seq_final + "||'" + self.module_dv_char_separator_naming + "'||"
-        seq_concatenate = seq_concatenate[:-(len(self.module_dv_char_separator_naming) + 6)]
+            seq_concatenate+=seq_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
+        seq_concatenate = seq_concatenate[:-(len(self.configuration['modules']['datavault']['char_separator_naming']) + 6)]
 
         md5_concatenate = ''
-        separator = "||'" + self.module_dv_char_separator_naming + "'||"
+        separator = "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
         if has_tn and has_seq:
             md5_concatenate = bk_concatenate + separator + tenant_concatenate + separator + seq_concatenate
         elif has_tn and not has_seq:
@@ -316,24 +330,24 @@ class EngineProcess(Engine):
         entry_dv_mapping_bk = self.metadata_actual.get_all_bk_from_entry_dv_cod_entity_target_and_num_branch_and_num_connection(link, num_branch, num_connection)
         entry_dv_mapping_bk.sort(key=lambda x: x.ordinal_position)
 
-        md5_function = self.connection.get_md5_function()
+        md5_function = self.hash_datavault_function
         cast_to_string = self.connection.get_cast_string_for_metadata()
 
         bk_concatenate = ''
         for bk in entry_dv_mapping_bk:
             bk_final = cast_to_string.replace('[x]', bk.column_name_source)
-            bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
+            bk_concatenate += bk_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
 
         tenant_concatenate = ''
         for tn in tenant_source:
             tn_final = cast_to_string.replace('[x]', tn.column_name_source)
-            tenant_concatenate += tn_final + "||'" + self.module_dv_char_separator_naming + "'||"
-        tenant_concatenate = tenant_concatenate[:-(len(self.module_dv_char_separator_naming) + 6)]
+            tenant_concatenate += tn_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
+        tenant_concatenate = tenant_concatenate[:-(len(self.configuration['modules']['datavault']['char_separator_naming']) + 6)]
 
         if has_tn:
             bk_concatenate += tenant_concatenate
         else:
-            bk_concatenate = bk_concatenate[:-(len(self.module_dv_char_separator_naming) + 6)]
+            bk_concatenate = bk_concatenate[:-(len(self.configuration['modules']['datavault']['char_separator_naming']) + 6)]
         md5_function = md5_function.replace('[x]', bk_concatenate)
         return md5_function
 
@@ -386,7 +400,7 @@ class EngineProcess(Engine):
 
             md5_function = self.get_hash_key_from_cod_entity_target_and_num_branch(hub.cod_entity, num_branch)
 
-            hash_for_metadata = self.connection.get_hash_for_metadata()
+            hash_for_metadata = self.hash_for_metadata
             new_dataset_mapping = [cod_entity_source, md5_function, prefix_et + hub_stg_tmp_name,
                                    hash_name,
                                    hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
@@ -446,7 +460,7 @@ class EngineProcess(Engine):
         self.metadata_actual.add_entry_dataset_relationship([new_relationship])
 
         # STG
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         new_dataset_mapping = [prefix_et + hub_stg_tmp_name, hash_name, prefix_et + hub_stg_name,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2], 1,
@@ -513,7 +527,7 @@ class EngineProcess(Engine):
         self.metadata_actual.add_entry_filters([new_filter])
 
         ordinal_position = 1
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         new_dataset_mapping = [prefix_et + hub_stg_name, hash_name, prefix_et + hub_stg_name_last_image,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2], 1,
@@ -581,7 +595,7 @@ class EngineProcess(Engine):
 
         ############################# Final Hub #################################
         ordinal_position = 1
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         new_dataset_mapping = [prefix_et + hub_stg_name_last_image, hash_name, prefix_et + hub_name,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2], 1,
@@ -705,7 +719,7 @@ class EngineProcess(Engine):
         applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(hub.cod_entity, sat[3])
         if applied_date is not None: has_ad = True
 
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         integer_for_metadata = self.connection.get_integer_for_metadata()
 
         ########################### Create Entity STG TMP ###########################
@@ -780,15 +794,15 @@ class EngineProcess(Engine):
             self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
             ordinal_position += 1
 
-        md5_function = self.connection.get_md5_function()
+        md5_function = self.hash_datavault_function
         cast_to_string = self.connection.get_cast_string_for_metadata()
 
         bk_concatenate = ''
         at_cod_entity_source = ''
         for at in all_attributes:
             bk_final = cast_to_string.replace('[x]', at.column_name_source)
-            bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
-        bk_concatenate = bk_concatenate[:-6-len(self.module_dv_char_separator_naming)]
+            bk_concatenate += bk_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
+        bk_concatenate = bk_concatenate[:-6-len(self.configuration['modules']['datavault']['char_separator_naming'])]
         hasdiff = md5_function.replace('[x]', bk_concatenate)
         new_dataset_mapping = [all_attributes[0].cod_entity_source, hasdiff,
                                prefix_et + sat_entity_tmp, 'HASHDIFF',
@@ -797,11 +811,14 @@ class EngineProcess(Engine):
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
         ordinal_position += 1
 
-        order_by = ''
-        if has_ad:
-            order_by = ' order by ' + applied_date.column_name_source + ' desc'
+
         if has_dck:
             hash_md5_function += all_dck_concatenate
+
+        if has_ad:
+            order_by = ' order by ' + applied_date.column_name_source + ' desc'
+        else:
+            order_by = ' order by NULL desc'
         new_dataset_mapping = [sat_cod_entity_source,
                                'ROW_NUMBER() over (partition by ' + hash_md5_function + order_by + ')',
                                prefix_et + sat_entity_tmp, 'RN',
@@ -917,7 +934,7 @@ class EngineProcess(Engine):
 
         new_dataset_mapping = [prefix_et + sat_entity_tmp, 'DATE_CREATED',
                                prefix_et + sat_entity_join, 'DATE_CREATED',
-                               hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
+                               sysdate_for_metadata[0], ordinal_position, sysdate_for_metadata[1], sysdate_for_metadata[2],
                                sat_num_branch, KEY_TYPE_NULL, 1, self.owner]
         ordinal_position += 1
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
@@ -1016,7 +1033,7 @@ class EngineProcess(Engine):
 
         new_dataset_mapping = [prefix_et + sat_entity_join, 'DATE_CREATED',
                                prefix_et + sat_entity, 'DATE_CREATED',
-                               hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
+                               sysdate_for_metadata[0], ordinal_position, sysdate_for_metadata[1], sysdate_for_metadata[2],
                                sat_num_branch, KEY_TYPE_NULL, 1, self.owner]
         ordinal_position += 1
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
@@ -1084,7 +1101,7 @@ class EngineProcess(Engine):
         applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(hub.cod_entity, sat[3])
         if applied_date is not None: has_ad = True
 
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         md5_function = self.get_hash_key_from_cod_entity_target_and_num_branch(sat_cod_entity_target, sat[3])
 
         new_dataset_mapping = [sat_cod_entity_source, md5_function, prefix_et + sat_entity,
@@ -1144,13 +1161,13 @@ class EngineProcess(Engine):
             self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
             ordinal_position += 1
 
-        md5_function = self.connection.get_md5_function()
+        md5_function = self.hash_datavault_function
         cast_to_string = self.connection.get_cast_string_for_metadata()
 
         bk_concatenate = ''
         for at in all_attributes:
             bk_final = cast_to_string.replace('[x]', at.column_name_source)
-            bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
+            bk_concatenate += bk_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
         bk_concatenate = bk_concatenate[:-2]
         hasdiff = md5_function.replace('[x]', bk_concatenate)
         new_dataset_mapping = [all_attributes[0].cod_entity_source, hasdiff,
@@ -1231,7 +1248,7 @@ class EngineProcess(Engine):
             applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(dv_entity.cod_entity, 1)
             if applied_date is not None: has_ad = True
 
-            hash_for_metadata = self.connection.get_hash_for_metadata()
+            hash_for_metadata = self.hash_for_metadata
 
             num_branches = self.metadata_actual.get_num_branches_on_entry_dv_from_cod_entity_name(dv_entity.cod_entity)
 
@@ -1485,7 +1502,7 @@ class EngineProcess(Engine):
                     cod_entity_target, 1)
                 if record_source is not None: has_rs = True
 
-                hash_for_metadata = self.connection.get_hash_for_metadata()
+                hash_for_metadata = self.hash_for_metadata
 
                 new_dataset_mapping = [prefix_et + sate_entity_union_sources, hash_name,
                                        prefix_et + sate_entity_union_sources_2,
@@ -1915,7 +1932,7 @@ class EngineProcess(Engine):
             applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(dv_entity.cod_entity, 1)
             if applied_date is not None: has_ad = True
 
-            hash_for_metadata = self.connection.get_hash_for_metadata()
+            hash_for_metadata = self.hash_for_metadata
 
             num_branches = self.metadata_actual.get_num_branches_on_entry_dv_from_cod_entity_name(dv_entity.cod_entity)
 
@@ -2040,7 +2057,7 @@ class EngineProcess(Engine):
                 tenant_source = self.metadata_actual.get_tenant_on_dv_from_cod_entity_target_and_num_branch(cod_entity_target, 1)
                 for tn in tenant_source:
                     new_dataset_mapping = [prefix_et + sate_entity, tn.column_name_target,
-                                           prefix_et + sate_entity_union_sources,
+                                           prefix_et + sate_entity_actual_image_1,
                                            tn.column_name_target,
                                            tn.column_type_target, ordinal_position, tn.column_length,
                                            tn.column_precision,
@@ -2051,7 +2068,7 @@ class EngineProcess(Engine):
             if has_ad:
                 applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(cod_entity_target, 1)
                 new_dataset_mapping = [prefix_et + sate_entity, applied_date.column_name_target,
-                                       prefix_et + sate_entity_union_sources,
+                                       prefix_et + sate_entity_actual_image_1,
                                        applied_date.column_name_target,
                                        applied_date.column_type_target, ordinal_position,
                                        applied_date.column_length,
@@ -2313,7 +2330,7 @@ class EngineProcess(Engine):
 
             if has_ad:
                 applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(cod_entity_target, 1)
-                new_dataset_mapping = [prefix_et + sate_entity_union_sources, applied_date.column_name_source,
+                new_dataset_mapping = [prefix_et + sate_entity_union_sources, applied_date.column_name_target,
                                        prefix_et + sate_entity_join,
                                        applied_date.column_name_target,
                                        applied_date.column_type_target, ordinal_position,
@@ -2540,7 +2557,7 @@ class EngineProcess(Engine):
         if applied_date is not None: has_ad = True
 
 
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
 
         num_branches = self.metadata_actual.get_num_branches_on_entry_dv_from_cod_entity_name(dv_entity.cod_entity)
 
@@ -2856,7 +2873,7 @@ class EngineProcess(Engine):
             record_source = self.metadata_actual.get_record_source_on_dv_from_cod_entity_target_and_num_branch(cod_entity_target, 1)
             if record_source is not None: has_rs = True
 
-            hash_for_metadata = self.connection.get_hash_for_metadata()
+            hash_for_metadata = self.hash_for_metadata
 
             new_dataset_mapping = [prefix_et + sts_entity_union_sources, hash_name , prefix_et + sts_entity_union_sources_2,
                                    hash_name+ "_2",
@@ -3176,6 +3193,8 @@ class EngineProcess(Engine):
         sat_name = dv_entity.name_record_tracking_satellite
         sat_num_branch = 1  # Sat can't have more than one branch -> sat[3]
 
+        sysdate_for_metadata = self.connection.get_sysdate_for_metadata()
+
         hash_name = 'HASH_' + dv_entity.entity_name
 
         if sat_name is None or sat_name == '': return
@@ -3216,7 +3235,7 @@ class EngineProcess(Engine):
         applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(dv_entity.cod_entity, 1)
         if applied_date is not None: has_ad = True
 
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         integer_for_metadata = self.connection.get_integer_for_metadata()
 
         ########################### Create Entity STG TMP ###########################
@@ -3286,7 +3305,7 @@ class EngineProcess(Engine):
             self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
 
             # Hashdiff from applied Date
-            md5_function = self.connection.get_md5_function()
+            md5_function = self.hash_datavault_function
             cast_to_string = self.connection.get_cast_string_for_metadata()
 
             bk_final = cast_to_string.replace('[x]', applied_date.column_name_source)
@@ -3400,7 +3419,7 @@ class EngineProcess(Engine):
 
         new_dataset_mapping = [prefix_et + sat_entity_tmp, 'DATE_CREATED',
                                prefix_et + sat_entity_join, 'DATE_CREATED',
-                               hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
+                               sysdate_for_metadata[0], ordinal_position, sysdate_for_metadata[1], sysdate_for_metadata[2],
                                sat_num_branch, KEY_TYPE_HASH_KEY, 1, self.owner]
         ordinal_position += 1
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
@@ -3474,7 +3493,7 @@ class EngineProcess(Engine):
 
         new_dataset_mapping = [prefix_et + sat_entity_join, 'DATE_CREATED',
                                prefix_et + sat_entity, 'DATE_CREATED',
-                               hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
+                               sysdate_for_metadata[0], ordinal_position, sysdate_for_metadata[1], sysdate_for_metadata[2],
                                sat_num_branch, KEY_TYPE_HASH_KEY, 1, self.owner]
         ordinal_position += 1
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
@@ -3559,7 +3578,7 @@ class EngineProcess(Engine):
 
             md5_function = self.get_hash_key_from_cod_entity_target_and_num_branch(link.cod_entity, num_branch)
 
-            hash_for_metadata = self.connection.get_hash_for_metadata()
+            hash_for_metadata = self.hash_for_metadata
             new_dataset_mapping = [cod_entity_source, md5_function, prefix_et + link_stg_tmp_name,
                                    hash_name,
                                    hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2],
@@ -3634,7 +3653,7 @@ class EngineProcess(Engine):
 
 
         # STG
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         new_dataset_mapping = [prefix_et + link_stg_tmp_name, hash_name, prefix_et + link_stg_name,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2], 1,
@@ -3721,7 +3740,7 @@ class EngineProcess(Engine):
 
         ############################# Last image #############################
         ordinal_position = 1
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         new_dataset_mapping = [prefix_et + link_stg_name, hash_name, prefix_et + link_stg_last_image_name,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2], 1,
@@ -3805,7 +3824,7 @@ class EngineProcess(Engine):
         ############################ Final LINK ##########################
 
         ordinal_position = 1
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         new_dataset_mapping = [prefix_et + link_stg_last_image_name, hash_name, prefix_et + link_name,
                                hash_name,
                                hash_for_metadata[0], ordinal_position, hash_for_metadata[1], hash_for_metadata[2], 1,
@@ -3949,7 +3968,7 @@ class EngineProcess(Engine):
         applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(link.cod_entity, sat[3])
         if applied_date is not None: has_ad = True
 
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         integer_for_metadata = self.connection.get_integer_for_metadata()
 
         ########################### Create Entity STG TMP ###########################
@@ -4024,15 +4043,15 @@ class EngineProcess(Engine):
             self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
             ordinal_position += 1
 
-        md5_function = self.connection.get_md5_function()
+        md5_function = self.hash_datavault_function
         cast_to_string = self.connection.get_cast_string_for_metadata()
 
         bk_concatenate = ''
         at_cod_entity_source = ''
         for at in all_attributes:
             bk_final = cast_to_string.replace('[x]', at.column_name_source)
-            bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
-        bk_concatenate = bk_concatenate[:-6 - len(self.module_dv_char_separator_naming)]
+            bk_concatenate += bk_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
+        bk_concatenate = bk_concatenate[:-6 - len(self.configuration['modules']['datavault']['char_separator_naming'])]
         hasdiff = md5_function.replace('[x]', bk_concatenate)
         new_dataset_mapping = [all_attributes[0].cod_entity_source, hasdiff,
                                prefix_et + sat_entity_tmp, 'HASHDIFF',
@@ -4041,11 +4060,13 @@ class EngineProcess(Engine):
         self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
         ordinal_position += 1
 
-        order_by = ''
-        if has_ad:
-            order_by = ' order by ' + applied_date.column_name_source + ' desc'
         if has_dck:
             hash_md5_function += all_dck_concatenate
+
+        if has_ad:
+            order_by = ' order by ' + applied_date.column_name_source + ' desc'
+        else:
+            order_by = ' order by NULL desc'
         new_dataset_mapping = [sat_cod_entity_source,
                                'ROW_NUMBER() over (partition by ' + hash_md5_function + order_by + ' )',
                                prefix_et + sat_entity_tmp, 'RN',
@@ -4338,7 +4359,7 @@ class EngineProcess(Engine):
         applied_date = self.metadata_actual.get_applied_date_on_dv_from_cod_entity_target(link.cod_entity, sat[3])
         if applied_date is not None: has_ad = True
 
-        hash_for_metadata = self.connection.get_hash_for_metadata()
+        hash_for_metadata = self.hash_for_metadata
         md5_function = self.get_hash_key_from_cod_entity_target_and_num_branch(sat_cod_entity_target, sat[3])
 
         new_dataset_mapping = [sat_cod_entity_source, md5_function, prefix_et + sat_entity,
@@ -4398,13 +4419,13 @@ class EngineProcess(Engine):
             self.metadata_actual.add_entry_dataset_mappings([new_dataset_mapping])
             ordinal_position += 1
 
-        md5_function = self.connection.get_md5_function()
+        md5_function = self.hash_datavault_function
         cast_to_string = self.connection.get_cast_string_for_metadata()
 
         bk_concatenate = ''
         for at in all_attributes:
             bk_final = cast_to_string.replace('[x]', at.column_name_source)
-            bk_concatenate += bk_final + "||'" + self.module_dv_char_separator_naming + "'||"
+            bk_concatenate += bk_final + "||'" + self.configuration['modules']['datavault']['char_separator_naming'] + "'||"
         bk_concatenate = bk_concatenate[:-2]
         hasdiff = md5_function.replace('[x]', bk_concatenate)
         new_dataset_mapping = [all_attributes[0].cod_entity_source, hasdiff,
@@ -4544,8 +4565,8 @@ class EngineProcess(Engine):
                 sources_loaded.append(entity.table_name)
 
                 # Get Dataset Specifications from Data Database
-                variable_connection = self.configuration_file['data']['connection_type'].lower() + "_database"
-                configuration_connection_data = self.configuration_file['data']
+                variable_connection = self.configuration['data']['connection_type'].lower() + "_database"
+                configuration_connection_data = self.configuration['data']
                 configuration_connection_data[variable_connection] = (self.metadata_to_load.get_path_from_id_path(id_path)).database_name
                 self.connection.setup_connection(configuration_connection_data, self.log)
                 table_definition = self.connection.get_table_columns_definition(entity.table_name)
@@ -4878,7 +4899,15 @@ class EngineProcess(Engine):
             dataset_src = self.metadata_to_load.get_dataset_from_dataset_name(self.metadata_actual.get_table_name_from_cod_entity_on_entry(order.cod_entity_src))
             dataset_spec = self.metadata_to_load.get_dataset_spec_from_id_dataset_and_column_name(dataset_src.id_dataset, order.column_name)
 
-            # TODO: Incluir esta validación en todos los procesos -> Si no existe el campo -> sacar alerta
+            if dataset_spec is None:
+                self.log.log(self.engine_name, "Error on Entry Order - Column not exists [" + order.column_name + "]", LOG_LEVEL_ONLY_LOG)
+                self.finish_execution(False)
+            if dataset_src is None:
+                self.log.log(self.engine_name, "Error on Entry Order - Entity Source not exists [" + order.cod_entity_src + "]", LOG_LEVEL_ONLY_LOG)
+                self.finish_execution(False)
+            if dataset is None:
+                self.log.log(self.engine_name, "Error on Entry Order - Entity not exists [" + order.cod_entity_target + "]", LOG_LEVEL_ONLY_LOG)
+                self.finish_execution(False)
             # if dataset_spec is None: -> lanzar error
             order_existent = self.metadata_actual.get_order_from_id_dataset_and_id_dataset_spec_and_id_branch(dataset.id_dataset, dataset_spec.id_dataset_spec, order.num_branch)
 
@@ -5290,6 +5319,11 @@ class EngineProcess(Engine):
         having_loaded = []
         for having in self.metadata_actual.entry_having:
             dataset = self.metadata_to_load.get_dataset_from_dataset_name(self.metadata_actual.get_table_name_from_cod_entity_on_entry(having.cod_entity_target))
+
+            if dataset is None:
+                self.log.log(self.engine_name, "Error on Entry Order - Entity not exists [" + having.cod_entity_target + "]", LOG_LEVEL_ONLY_LOG)
+                self.finish_execution(False)
+
             id_branch = having.num_branch
             value_having = having.value
 
@@ -5456,9 +5490,9 @@ class EngineProcess(Engine):
     def upload_metadata(self):
         self.log.log(self.engine_name, "Starting to upload all the metadata processed", LOG_LEVEL_INFO)
 
-        connection_type = self.configuration_file['metadata']['connection_type']
+        connection_type = self.configuration['metadata']['connection_type']
         connection = ConnectionFactory().get_connection(connection_type)
-        connection.setup_connection(self.configuration_file['metadata'], self.log)
+        connection.setup_connection(self.configuration['metadata'], self.log)
         where_filter_owner = "META_OWNER='" + self.owner + "'"
         commit_values_batch = self.properties_file['options']['max_commit_batch']
 

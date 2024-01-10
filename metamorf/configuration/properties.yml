@@ -1,6 +1,6 @@
 name: "Metamorf"
 description: "Metadata Suite to build and manage your Datawarehouse metadata-driven"
-version: "0.4.4.2"
+version: "0.5.0"
 author: "Guillermo Aumatell Salom"
 contact: "guillermoaumatell@gmail.com"
 
@@ -82,22 +82,36 @@ options:
   log_print: 'Y'
   print_debug: 'N'
   max_commit_batch: 100
+  max_size_mega_bytes_log_file: 5
 
 modules:
   - name: "elt"
-    description: "Module to load all the temporary tables."
-    version: 0.5.1
+    description: "Module to create SQL transformations."
+    version: 0.4.2
     functions:
       - name: "status"
-        values: ['ACTIVE','INACTIVE']
+        values: ['ACTIVE']
+      - name: "threads"
+        values: [1,2,3,4,5,6,7,8,9,10]
+      - name: "execution"
+        values: ['stop-on-errors', 'run']
+      - name: "on_schema_change"
+        values: ['append', 'ignore']
+      - name: "create_database"
+        values: [true, false]
+      - name: "create_schema"
+        values: [true, false]
   - name: "datavault"
-    description: "Module to load all the DataVault entities: Hubs, Links, Sats, Pits, Bridges..."
-    version: 0.0.0
+    description: "Module to load all the DataVault entities: Hubs, Links, Satellites, ..."
+    version: 0.2.1
     functions:
       - name: "status"
         values: ['ACTIVE','INACTIVE']
       - name: "char_separator_naming"
         values: ['_', '__', '$', '&', '/', '|','||']
+        accept_all_values: 'Y'
+      - name: "hash"
+        values: ['md5', 'sha256']
 
 database:
   - name: 'SQLite'
@@ -117,3 +131,10 @@ output:
 api:
   port: 5555
   host: localhost
+
+logo: "\n
+._____     _                     ___ \n
+|     |___| |_ ___ _____ ___ ___|  _|\n
+| | | | -_|  _| .'|     | . |  _|  _|\n
+|_|_|_|___|_| |__,|_|_|_|___|_| |_|  
+"

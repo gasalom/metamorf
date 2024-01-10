@@ -141,16 +141,17 @@ CREATE TABLE OM_REF_ENTITY_TYPE (
  );
 
 CREATE TABLE ENTRY_DV_ENTITY (
-	COD_ENTITY           text NOT NULL  PRIMARY KEY  ,
+	COD_ENTITY           text NOT NULL    ,
 	ENTITY_NAME          text     ,
 	ENTITY_TYPE          text     ,
 	COD_PATH             text     ,
 	NAME_STATUS_TRACKING_SATELLITE text     ,
 	NAME_RECORD_TRACKING_SATELLITE text     ,
 	NAME_EFFECTIVITY_SATELLITE text     ,
-	OWNER                text     ,
-	FOREIGN KEY ( ENTITY_TYPE ) REFERENCES OM_REF_ENTITY_TYPE( ENTITY_TYPE_NAME )
+	OWNER                text NOT NULL    ,
+	CONSTRAINT Pk_ENTRY_DV_ENTITY_COD_ENTITY PRIMARY KEY ( COD_ENTITY, OWNER )
  );
+
 
 CREATE TABLE ENTRY_DV_PROPERTIES (
 	COD_ENTITY           text     ,
@@ -168,7 +169,6 @@ CREATE TABLE ENTRY_ENTITY (
 	STRATEGY             text     ,
 	OWNER                text NOT NULL    ,
 	CONSTRAINT Pk_ENTRY_DATASET_COD_ENTITY PRIMARY KEY ( COD_ENTITY, OWNER ),
-	CONSTRAINT Unq_ENTRY_ENTITY_COD_ENTITY UNIQUE ( COD_ENTITY ) ,
 	FOREIGN KEY ( ENTITY_TYPE ) REFERENCES OM_REF_ENTITY_TYPE( ENTITY_TYPE_NAME )  ,
 	FOREIGN KEY ( COD_PATH ) REFERENCES ENTRY_PATH( COD_PATH )  ,
 	FOREIGN KEY ( STRATEGY ) REFERENCES OM_REF_QUERY_TYPE( QUERY_TYPE_NAME )
@@ -220,7 +220,7 @@ CREATE TABLE GIT_ENTRY_DV_MAPPINGS (
 	COD_ENTITY_TARGET    text     ,
 	COLUMN_NAME_TARGET   text     ,
 	COLUMN_TYPE_TARGET   text     ,
-	ORDINAL_POSITION     text     ,
+	ORDINAL_POSITION     integer     ,
 	COLUMN_LENGTH        integer     ,
 	COLUMN_PRECISION     integer     ,
 	NUM_BRANCH           integer     ,
@@ -438,7 +438,7 @@ CREATE TABLE ENTRY_DV_MAPPINGS (
 	COD_ENTITY_TARGET    text     ,
 	COLUMN_NAME_TARGET   text     ,
 	COLUMN_TYPE_TARGET   text     ,
-	ORDINAL_POSITION     text     ,
+	ORDINAL_POSITION     integer     ,
 	COLUMN_LENGTH        integer     ,
 	COLUMN_PRECISION     integer     ,
 	NUM_BRANCH           integer     ,
@@ -581,7 +581,7 @@ INSERT INTO OM_REF_ENTITY_TYPE (ID_ENTITY_TYPE, ENTITY_TYPE_NAME, ENTITY_TYPE_DE
 (3, 'WITH', 'With Clause', 'With', 0),
 (4, 'HUB', 'Datavault - Hub', 'Hub', 1),
 (5, 'LINK', 'Datavault - Link', 'Link', 1),
-(6, 'SAT', 'Datavault - Satellite', 'Satellite', '1'),
+(6, 'SAT', 'Datavault - Satellite', 'Satellite', 1),
 (7, 'STS', 'Datavault - Status Tracking Satellite', 'Status Tracking Satellite', 1),
 (8, 'RTS', 'Datavault - Satellite', 'Record Tracking Satellite', 1),
 (9, 'SATE', 'Datavault - Effectivity Satellite', 'Effectivity Satellite', 1);
@@ -609,9 +609,10 @@ INSERT INTO OM_REF_QUERY_TYPE(ID_QUERY_TYPE, QUERY_TYPE_NAME, QUERY_TYPE_DESCRIP
 (3, 'DELETE', 'Deletes based on the Primary Key'),
 (4, 'SELECT', 'Select the target query'),
 (5, 'MERGE', 'Select the target query'),
-(6, 'TRUNCATE AND INSERT', 'Truncate the target table and inserts');
+(6, 'TRUNCATE AND INSERT', 'Truncate the target table and inserts'),
+(7, 'DROP AND INSERT', 'Drop the target table and inserts');
 
 INSERT INTO OM_PROPERTIES(PROPERTY, VALUE, START_DATE) VALUES
-('Version', '0.4', date('now')),
+('Version', '0.4.5.1', date('now')),
 ('Module Deployed', 'ELT', date('now')),
 ('Module Deployed', 'DV', date('now'));
